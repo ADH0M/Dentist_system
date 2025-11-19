@@ -36,8 +36,8 @@ export default function RootLayout({
             defaultTheme="system"
             disableTransitionOnChange
           >
-            <Sidebar />
-            <main className="flex-1 p-6">{children}</main>
+            {/* <Sidebar /> */}
+            <main className="flex-1 ">{children}</main>
           </ThemeProvider>
         </body>
       </html>

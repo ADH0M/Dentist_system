@@ -1,106 +1,126 @@
 "use client";
+import { loginUpAction } from "@/lib/actions/auth-action";
+import Link from "next/link";
 import { useActionState } from "react";
 
-const FormSection = () => {
-  const [state, formAction, pending] = useActionState(()=>{}, {});
-  return (
-    <form className="space-y-6" action={formAction}>
-      {/* Name Field */}
-      <div>
-        <label
-          htmlFor="name"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
-          name
-        </label>
-        <input
-          id="name"
-          name="name"
-          type="text"
-          className={`w-full px-4 py-3 rounded-lg border outline-none text-gray-800 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition`}
-          placeholder="John Doe"
-        />
-        {state.username && (
-          <p className="mt-1 text-sm text-red-600">{state.username}</p>
-        )}
-      </div>
+const initialState: {
+  message: string;
+  errors?: {
+    username?: string[];
+    email?: string[];
+    phone?: string[];
+    password?: string[];
+    confirmPassword?: string[];
+    general?: string;
+  };
+} = { message: "" };
 
-      {/* Email Field */}
-      <div>
-        <label
-          htmlFor="email"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
-          email
-        </label>
-        <input
-          id="email"
-          name="email"
-          type="email"
-          className={`w-full px-4 py-3 rounded-lg border text-gray-800 outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition`}
-          placeholder="you@example.com"
-        />
-        {state.email && (
-          <p className="mt-1 text-sm text-red-600">{state.email}</p>
-        )}
-      </div>
-
-      {/* Password Field */}
-      <div>
-        <label
-          htmlFor="password"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
-          password
-        </label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          className={`w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-purple-500  outline-none
-                    focus:border-transparent transition text-gray-800`}
-          placeholder="••••••••"
-        />
-        {state.password && (
-          <p className="mt-1 text-sm text-red-600">{state.password}</p>
-        )}
-      </div>
-
-      {/* Submit Button */}
-      <button
-        type="submit"
-        className={`w-full py-3 px-4 rounded-lg bg-linear-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-medium shadow-md transition-all duration-200 `}
-      >
-        {pending ? (
-          <span className="flex items-center justify-center">
-            <svg
-              className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              ></circle>
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              ></path>
-            </svg>
-            <span className="mx-2 block">loading-createAcount</span>
-          </span>
-        ) : (
-          'creatingAccount'
-        )}
-      </button>
-    </form>
+export default function Signup() {
+  const [state, formAction, isPending] = useActionState(
+    loginUpAction,
+    initialState
   );
-};
 
-export default FormSection;
+  return (
+    <div className="w-full flex flex-col items-center justify-center max-h-screen gap-10 p-4  h-screen ">
+      <div className="w-full flex justify-center items-center  h-full ">
+        <div className="bg-card w-full sm:w-3/4 md:w-1/2 rounded-2xl shadow-xl  overflow-hidden ">
+          <div className="bg-linear-to-r from-accent to-accent-foreground p-4 text-card-foreground text-center">
+            <h2 className="text-2xl font-bold">Create New Account</h2>
+            <p className="mt-2">Fill in the details to create a new account</p>
+          </div>
+
+          {state.errors?.general && (
+            <div className="bg-red-50 border-l-4 border-red-500 p-4 mx-6 mt-4 text-red-700 text-sm">
+              {state.errors.general}
+            </div>
+          )}
+
+          <form
+            action={formAction}
+            className="p-6 h-96  flex justify-center flex-col items-center border border-border"
+          >
+            {/* Email */}
+            <div className="md:w-[90%] w-full">
+              <label htmlFor="email" className="auth-label ">
+                Email Address
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                className="auth-input"
+                placeholder="example@email.com"
+              />
+              <p className="auth-notvalid">
+                {state.errors?.email && state.errors.email[0]}
+              </p>
+            </div>
+            {/* Password */}
+            <div className="md:w-[90%] w-full">
+              <label htmlFor="password" className="auth-label">
+                Password
+              </label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                className="auth-input"
+                placeholder="********"
+                autoComplete="new-password"
+              />
+              <p className="auth-notvalid">
+                {state.errors?.password && state.errors.password[0]}
+              </p>
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              className="w-full md:w-[90%] text-sm  bg-linear-to-t from-accent to-accent-foreground 
+              text-white rounded-lg py-3 px-4 font-normal hover:bg-accent transition duration-300"
+            >
+              {isPending ? (
+                <span className="flex items-center justify-center">
+                  <svg
+                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  <span className="mx-2 block">loading-createAcount</span>
+                </span>
+              ) : (
+                "sing up"
+              )}
+            </button>
+
+            <p className="text-sm text-center text-gray-600">
+              Create new account?{" "}
+              <Link
+                href="/register"
+                className="text-accent-foreground hover:underline font-medium"
+              >
+                register
+              </Link>
+            </p>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}

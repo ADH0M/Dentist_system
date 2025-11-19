@@ -9,15 +9,28 @@ datasource db {
 }
 
 model Task {
-  id     String @id @default(auto()) @map("_id") @db.ObjectId
-  title  String
-  userId String @db.ObjectId
-  user   User   @relation(fields: [userId], references: [id])
+  id       String   @id @default(auto()) @map("_id") @db.ObjectId
+  title    String
+  userId   String   @db.ObjectId
+  user     User     @relation(fields: [userId], references: [id])
   favorite Boolean?
+  @@index([userId])
 }
 
 model User {
-  id    String @id @default(auto()) @map("_id") @db.ObjectId
-  email String
-  posts Task[]
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
+  username String
+  email    String  @unique
+  password String
+  isActive Boolean @default(false)
+  type     UserType @default(customer) 
+  phone    String? @unique
+  photo    String?
+  tasks    Task[]
+}
+
+//--------------   enums -------------------------
+enum UserType {
+  customer
+  admin
 }
