@@ -4,6 +4,7 @@ import "./globals.css";
 import StoreProvider from "@/store/store";
 import Sidebar from "@/components/Aside";
 import { ThemeProvider } from "next-themes";
+import Navbar from "@/components/ui/Navbar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,7 +30,7 @@ export default function RootLayout({
     <StoreProvider>
       <html lang="en" suppressHydrationWarning>
         <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased flex main-bg`}
+          className={`${geistSans.variable} ${geistMono.variable} antialiased  main-bg`}
         >
           <ThemeProvider
             attribute="class"
@@ -37,6 +38,7 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             {/* <Sidebar /> */}
+            <Navbar/>
             <main className="flex-1 ">{children}</main>
           </ThemeProvider>
         </body>

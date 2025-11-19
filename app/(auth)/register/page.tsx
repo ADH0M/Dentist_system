@@ -22,9 +22,9 @@ export default function Signup() {
   );
 
   return (
-    <div className="w-full flex flex-col items-center justify-center max-h-screen gap-10 p-4  h-screen ">
-      <div className="w-full flex justify-center items-center  h-full ">
-        <div className="bg-card w-full sm:w-3/4 md:w-1/2 rounded-2xl shadow-xl  overflow-hidden ">
+    <div className="w-full flex flex-col items-center justify-center max-h-screen gap-10 p-4 ">
+      <div className="w-full flex justify-center   h-full ">
+        <div className="bg-card w-full sm:w-1/2 md:w-1/3 rounded-2xl shadow-xl  overflow-hidden ">
           <div className="bg-linear-to-r from-accent to-accent-foreground p-4 text-card-foreground text-center">
             <h2 className="text-2xl font-bold">Create New Account</h2>
             <p className="mt-2">Fill in the details to create a new account</p>

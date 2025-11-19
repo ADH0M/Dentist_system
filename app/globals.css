@@ -187,7 +187,7 @@ body {
             rounded-lg focus:ring-blue-500 focus:border-blue-500 pl-3 pr-4  py-3;
   }
   .auth-label {
-    @apply block text-[14px]  font-medium text-foreground mb-1;
+    @apply block text-[12px]  font-medium text-foreground mb-1;
   }
 
   .auth-notvalid {
