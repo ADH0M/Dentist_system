@@ -12,7 +12,7 @@ export default function Sidebar() {
   ];
 
   return (
-    <aside className="w-64 bg-linear-to-br from-gray-800 to-gray-900 text-white min-h-screen flex flex-col">
+    <aside className="w-64 bg-linear-to-br from-gray-800 to-gray-900 text-white max-h-screen flex flex-col">
       {/* Logo Section */}
       <div className="p-6 border-b border-gray-700">
         <div className="flex items-center space-x-3">

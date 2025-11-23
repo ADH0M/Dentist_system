@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import prisma from "../db/db-connection";
+import bcrypt from "bcryptjs";
 
 type SignupFormState = {
   message?: string;
@@ -60,30 +62,27 @@ export async function registerAction(
   }
 
   try {
-    const cookieStore = await cookies();
-    const existingUser = await prisma.user.findUnique({where:{
-        email
-    }});
+    const existingUser = await prisma.user.findUnique({ where: { email } });
 
-    console.log(existingUser);
-    
     if (existingUser) {
       return {
         message: "User already exists.",
         errors: {
-          general: "An account with this email or phone already exists.",
+          general: "An account with this email already exists.",
         },
       };
     }
 
-    const user = await prisma.user.create({data:{email , username , password , }});
-    console.log(user);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    cookieStore.set("user-id", user.id);
-    cookieStore.set("user-email", user.email);
-    cookieStore.set("user-name", user.username);
+    await prisma.user.create({
+      data: {
+        email,
+        username,
+        password: hashedPassword,
+      },
+    });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error("Signup error:", error);
     return {
@@ -130,12 +129,12 @@ export async function loginUpAction(
   try {
     const cookieStore = await cookies();
 
-    const user = await prisma .user.findUnique({ where:{email} })
+    const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
       return { errors: { general: "Invalid credentials" } };
     }
 
-    const isMatch = password === user.password;
+    const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return { errors: { general: "Invalid credentials" } };
     }
@@ -159,44 +158,34 @@ export async function loginUpAction(
       path: "/",
     });
 
-    cookieStore.set("userId", user?.id);
-    cookieStore.set("email", user?.email);
-    cookieStore.set("username", user?.username);
-    cookieStore.set("role", user?.type);
+    cookieStore.set("userId", user.id);
+    cookieStore.set("email", user.email);
+    cookieStore.set("username", user.username);
+    cookieStore.set("role", user.type);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    console.error("Signup error:", error);
+    console.error("Login error:", error);
     return {
       message: "Something went wrong.",
       errors: {
-        general: "Failed to create account. Please try again later.",
+        general: "Failed to login. Please try again later.",
       },
     };
   }
 
   redirect("/");
-};
+}
 
-// export async function logoutAction() {
-//   try {
-//     const cookieStore = await cookies();
-//     cookieStore.delete("session");
-//     cookieStore.delete("user-id");
-//     cookieStore.delete("user-email");
-//     cookieStore.delete("user-name");
-//     cookieStore.delete("user-role");
-
-//     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-//   } catch (error: any) {
-//     console.error("Signup error:", error);
-//     return {
-//       message: "Something went wrong.",
-//       errors: {
-//         general: "Failed to logout account. Please try again later.",
-//       },
-//     };
-//   }
-
-//   redirect("/");
-// };
+export async function logoutAction() {
+  try {
+    const cookieStore = await cookies();
+    cookieStore.delete("session");
+    cookieStore.delete("userId");
+    cookieStore.delete("email");
+    cookieStore.delete("username");
+    cookieStore.delete("role");
+  } catch (error: any) {
+    console.error("Logout error:", error);
+  }
+  redirect("/login");
+}

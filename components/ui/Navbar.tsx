@@ -2,29 +2,30 @@
 
 import { useTheme } from "next-themes";
 import Link from "next/link";
-import { useParams, usePathname } from "next/navigation";
-import { ChangeEvent, useState } from "react";
+import { usePathname } from "next/navigation";
+import { ChangeEvent, useRef, useState } from "react";
+import UserModal, { IControler } from "./UserModal";
 
 const links = [
   { path: "/", title: "Home", id: "8home8ii" },
-  { path: "/about", title: "about", id: "about08ii" },
-  { path: "/contact-us", title: "Contact Us", id: "contactadf-usi" },
+  { path: "/user", title: "Dashboard", id: "dashboard08ii" },
+  { path: "/notes", title: "Notes", id: "notes08ii" },
 ];
 
 export default function Navbar() {
   const { theme, setTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
+  const openModal = useRef<IControler | null>(null);
+
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  const toggleDarkMode = () => {
-    setTheme(theme === "dark" ? "light" : "dark");
-  };
   const handleChange = (e: ChangeEvent<HTMLSelectElement>) => {
     setTheme(e.target.value);
   };
+
   return (
     <nav className="sticky top-0 left-0 z-50 bg-sidebar border-b border-sidebar backdrop-blur-sm shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -78,6 +79,17 @@ export default function Navbar() {
             >
               Register
             </Link>
+
+            <UserModal ref={openModal}>
+              <span
+                onClick={() => {
+                  openModal.current?.open();
+                }}
+                className="text-xs text-secondary flex justify-center items-center  w-10 h-10 bg-accent rounded-full border border-accent-foreground"
+              >
+                img
+              </span>
+            </UserModal>
           </div>
 
           {/* Mobile Menu Button */}

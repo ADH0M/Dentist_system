@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import StoreProvider from "@/store/store";
-import Sidebar from "@/components/Aside";
 import { ThemeProvider } from "next-themes";
 import Navbar from "@/components/ui/Navbar";
 
@@ -40,6 +39,38 @@ export default function RootLayout({
             {/* <Sidebar /> */}
             <Navbar/>
             <main className="flex-1 ">{children}</main>
+      
+                          {/* Footer */}
+            <footer className="bg-card border-t border-border py-12 px-4 ">
+              <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div className="col-span-1 md:col-span-2">
+                  <h3 className="text-xl font-bold mb-4">Simple Note App</h3>
+                  <p className="text-muted-foreground max-w-xs">
+                    The best way to organize your tasks and boost productivity.
+                  </p>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-4">Product</h4>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li><a href="#" className="hover:text-foreground">Features</a></li>
+                    <li><a href="#" className="hover:text-foreground">Pricing</a></li>
+                    <li><a href="#" className="hover:text-foreground">FAQ</a></li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-4">Company</h4>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li><a href="#" className="hover:text-foreground">About Us</a></li>
+                    <li><a href="#" className="hover:text-foreground">Contact</a></li>
+                    <li><a href="#" className="hover:text-foreground">Privacy Policy</a></li>
+                  </ul>
+                </div>
+              </div>
+              <div className="max-w-7xl mx-auto mt-12 pt-8 border-t border-border text-center text-sm text-muted-foreground">
+                © {new Date().getFullYear()} Simple Note App. All rights reserved.
+              </div>
+            </footer>
+            
           </ThemeProvider>
         </body>
       </html>
