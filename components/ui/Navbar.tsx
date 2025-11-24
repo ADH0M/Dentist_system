@@ -8,11 +8,18 @@ import UserModal, { IControler } from "./UserModal";
 
 const links = [
   { path: "/", title: "Home", id: "8home8ii" },
-  { path: "/user", title: "Dashboard", id: "dashboard08ii" },
   { path: "/notes", title: "Notes", id: "notes08ii" },
 ];
 
-export default function Navbar() {
+type User = {
+  id: string;
+  username: string;
+  email: string;
+  role: string;
+  isActive: boolean;
+} | null;
+
+export default function Navbar({ user }: { user?: User }) {
   const { theme, setTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
@@ -56,40 +63,56 @@ export default function Navbar() {
               );
             })}
 
+            {user?.role === "admin" && (
+               <Link
+               href="/admin"
+               className={`font-normal text-sm ${
+                 pathname === "/admin" ? "border border-primary  " : ""
+               } rounded-md px-2 p-1 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground`}
+             >
+               Dashboard
+             </Link>
+            )}
+
             {/* Dark Mode Toggle */}
             <select
               name="select-item"
               id="mean-select"
               onChange={handleChange}
               value={theme}
+              className="bg-transparent border border-border rounded-md text-sm p-1"
             >
               <option value="dark">dark</option>
               <option value="light">light</option>
             </select>
 
-            <Link
-              href="/login"
-              className="text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white font-medium"
-            >
-              Login
-            </Link>
-            <Link
-              href="/register"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-            >
-              Register
-            </Link>
-
-            <UserModal ref={openModal}>
-              <span
-                onClick={() => {
-                  openModal.current?.open();
-                }}
-                className="text-xs text-secondary flex justify-center items-center  w-10 h-10 bg-accent rounded-full border border-accent-foreground"
-              >
-                img
-              </span>
-            </UserModal>
+            {!user ? (
+              <>
+                <Link
+                  href="/login"
+                  className="text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white font-medium"
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/register"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                >
+                  Register
+                </Link>
+              </>
+            ) : (
+              <UserModal ref={openModal} user={user}>
+                <span
+                  onClick={() => {
+                    openModal.current?.open();
+                  }}
+                  className="text-xs text-secondary flex justify-center items-center  w-10 h-10 bg-accent rounded-full border border-accent-foreground cursor-pointer"
+                >
+                  {user.username?.charAt(0).toUpperCase()}
+                </span>
+              </UserModal>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -156,6 +179,23 @@ export default function Navbar() {
                 {link.title}
               </Link>
             ))}
+            
+            {user?.role === "admin" && (
+               <Link
+               href="/admin"
+               className={`block py-2 text-gray-700 hover:text-gray-900 
+                dark:text-gray-300 dark:hover:text-white
+                 font-medium   ${
+                   pathname === "/admin"
+                     ? "border-b border-primary "
+                     : "border-b border-accent-foreground "
+                 }
+                 dark:border-gray-800`}
+               onClick={toggleMenu}
+             >
+               Dashboard
+             </Link>
+            )}
 
             <div className="py-2 border-b border-gray-100 dark:border-gray-800">
               {/* Dark Mode Toggle */}
@@ -164,6 +204,7 @@ export default function Navbar() {
                 id="mean-select"
                 onChange={handleChange}
                 value={theme}
+                className="bg-transparent border border-border rounded-md text-sm p-1 w-full"
               >
                 <option value="dark">dark</option>
                 <option value="light">light</option>
@@ -171,20 +212,29 @@ export default function Navbar() {
             </div>
 
             <div className="pt-2 flex flex-col space-y-3">
-              <Link
-                href="/login"
-                className="block py-2 text-center text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white font-medium rounded-lg"
-                onClick={toggleMenu}
-              >
-                Login
-              </Link>
-              <Link
-                href="/register"
-                className="block py-2 text-center bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium"
-                onClick={toggleMenu}
-              >
-                Register
-              </Link>
+              {!user ? (
+                <>
+                  <Link
+                    href="/login"
+                    className="block py-2 text-center text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white font-medium rounded-lg"
+                    onClick={toggleMenu}
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    href="/register"
+                    className="block py-2 text-center bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium"
+                    onClick={toggleMenu}
+                  >
+                    Register
+                  </Link>
+                </>
+              ) : (
+                 <div className="py-2 text-center">
+                    <p className="font-medium">{user.username}</p>
+                    <p className="text-sm text-muted-foreground">{user.email}</p>
+                 </div>
+              )}
             </div>
           </div>
         </div>

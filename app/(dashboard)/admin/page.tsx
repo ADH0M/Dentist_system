@@ -9,10 +9,20 @@ const AdminDashboard = async () => {
   const cookieStore = await cookies();
   const role = cookieStore.get("role")?.value;
   const currentUserId = cookieStore.get("userId")?.value;
+  const username = cookieStore.get("username")?.value;
+  const email = cookieStore.get("email")?.value;
 
   if (role !== "admin") {
     redirect("/user");
   }
+
+  const currentUser = {
+    id: currentUserId || "",
+    username: username || "",
+    email: email || "",
+    role: role || "",
+    isActive: true
+  };
 
   // Fetch users but handle potential error if schema doesn't have createdAt yet, though I added it to Task, User might not have it. 
   // Let's stick to simple findMany without orderBy if unsure, or just assume it's fine.
@@ -34,7 +44,7 @@ const AdminDashboard = async () => {
 
   return (
     <div className="flex min-h-screen "> 
-      <Sidebar/>
+      <Sidebar user={currentUser}/>
       <div className="p-6 flex-1 mx-auto">
         <h1 className="text-3xl font-bold mb-8 text-accent-foreground">Admin Dashboard</h1>
         

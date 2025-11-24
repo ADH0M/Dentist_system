@@ -192,7 +192,7 @@ const Columns = ({columns: initialColumns}: {columns: ColumnWithTasks[]}) => {
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-        <div className='flex-1 overflow-x-auto flex gap-6 pb-4' >
+        <div className='flex-1 flex flex-col md:flex-row gap-6 pb-4 h-full md:overflow-x-auto' >
         {columns.map((column) => (
             <Column key={column.id} column={column} />
             ))}
