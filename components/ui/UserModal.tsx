@@ -1,14 +1,13 @@
 "use client";
 import { logoutAction } from "@/lib/actions/auth-action";
-import Link from "next/link";
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 
 type User = {
-  id: string;
-  username: string;
-  email: string;
-  role: string;
-  isActive: boolean;
+  id: string|undefined;
+  username: string|undefined;
+  email: string|undefined;
+  role: string|undefined;
+  isActive: boolean|undefined;
 } | null;
 
 type IProps = {

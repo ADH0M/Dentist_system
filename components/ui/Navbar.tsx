@@ -12,11 +12,11 @@ const links = [
 ];
 
 type User = {
-  id: string;
-  username: string;
-  email: string;
-  role: string;
-  isActive: boolean;
+  id: string |undefined;
+  username: string|undefined;
+  email: string|undefined;
+  role: string|undefined;
+  isActive: boolean|undefined;
 } | null;
 
 export default function Navbar({ user }: { user?: User }) {
