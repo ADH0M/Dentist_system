@@ -4,7 +4,7 @@ import prisma from "@/lib/db/db-connection";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 
-export async function createColumn(formData: FormData) {
+export async function createColumn(order : number, formData: FormData) {
   const title = formData.get("title") as string;
   const cookieStore = await cookies();
   const userId = cookieStore.get("userId")?.value;
@@ -16,6 +16,7 @@ export async function createColumn(formData: FormData) {
       data: {
         title,
         userId,
+        order: 0,
       },
     });
     revalidatePath("/notes");
@@ -35,7 +36,7 @@ export async function deleteColumn(columnId: string) {
   }
 }
 
-export async function createTask(formData: FormData) {
+export async function createTask(order : number, formData: FormData) {
   const title = formData.get("title") as string;
   const columnId = formData.get("columnId") as string;
   const cookieStore = await cookies();
@@ -49,6 +50,7 @@ export async function createTask(formData: FormData) {
         title,
         columnId,
         userId,
+        order,
       },
     });
     revalidatePath("/notes");
@@ -78,4 +80,35 @@ export async function updateTaskColumn(taskId: string, newColumnId: string) {
     } catch (error) {
         console.error("Failed to move task:", error);
     }
+}
+
+export async function updateTaskPosition(taskId: string, newColumnId: string, newOrder: number) {
+  try {
+    await prisma.task.update({
+      where: { id: taskId },
+      data: {
+        columnId: newColumnId,
+        order: newOrder,
+      },
+    });
+    revalidatePath("/notes");
+  } catch (error) {
+    console.error("Failed to update task position:", error);
+  }
+}
+
+export async function getColumnsAction(userId: string) {
+  try {
+    const columns = await prisma.column.findMany({
+      where: { userId },
+      include: {
+        tasks: true,
+      },
+      orderBy: { order: 'asc' }
+    });
+    return columns;
+  } catch (error) {
+    console.error("Failed to get columns:", error);
+    return [];
+  }
 }

@@ -14,7 +14,7 @@ model Task {
   title    String
   content  String?
   favorite Boolean? @default(false)
-  order    Int      @default(0)
+  order    Float    @default(0)
   
   userId   String   @db.ObjectId
   user     User     @relation(fields: [userId], references: [id])
@@ -32,7 +32,7 @@ model Task {
 model Column {
   id       String @id @default(auto()) @map("_id") @db.ObjectId
   title    String
-  order    Int    @default(0)
+  order    Float    @default(0)
   userId   String @db.ObjectId
   user     User   @relation(fields: [userId], references: [id])
   tasks    Task[]
