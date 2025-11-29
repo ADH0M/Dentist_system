@@ -1,13 +1,10 @@
-// app/admin/users/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { createUser, deleteUser, toggleUserActive, updateUserType } from "@/lib/actions/users";
 
 
-// أنواع المستخدمين حسب الـ Prisma
 type UserType = "customer" | "admin";
 
 interface User {

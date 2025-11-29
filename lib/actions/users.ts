@@ -2,17 +2,14 @@
 "use server";
 import prisma from "../db/db-connection";
 
-
-
 export async function createUser(formData: FormData) {
-
   const username = formData.get("username") as string;
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
   const phone = formData.get("phone") as string | null;
   const type = formData.get("type") as "customer" | "admin";
 
-  const hashedPassword = password; 
+  const hashedPassword = password;
   await prisma.user.create({
     data: {
       username,
@@ -53,4 +50,29 @@ export async function deleteUser(formData: FormData) {
   await prisma.user.delete({
     where: { id: userId },
   });
+}
+
+export async function getUser(userId: string, email: string) {
+  if (!userId || !email) {
+    throw new Error("User ID and email are required");
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      username: true,
+      email: true,
+      photo: true,
+      type: true,
+      phone: true,
+      isActive: true,
+    },
+  });
+
+  if (!user || user.email !== email) {
+    throw new Error("User not found or email mismatch");
+  }
+
+  return user;
 }

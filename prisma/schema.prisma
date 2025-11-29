@@ -5,54 +5,126 @@ generator client {
 
 datasource db {
   provider = "mongodb"
-  url      = env("DATABASE_URL")
+  url = env("DATABASE_URL")
 }
 
-
-model Task {
+model User {
   id       String   @id @default(auto()) @map("_id") @db.ObjectId
-  title    String
-  content  String?
-  favorite Boolean? @default(false)
-  order    Float    @default(0)
-  
-  userId   String   @db.ObjectId
-  user     User     @relation(fields: [userId], references: [id])
-  
-  columnId String?  @db.ObjectId
-  column   Column?  @relation(fields: [columnId], references: [id])
-  
+  username String
+  email    String   @unique
+  password String
+  isActive Boolean  @default(false)
+  type     UserType @default(customer)
+  phone    String?  @unique
+  photo    String?
+
+  projects  Project[]
+  notes     Note[]
+  tasks     Task[]
+  adminLogs AdminAction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Project {
+  id    String      @id @default(auto()) @map("_id") @db.ObjectId
+  title String
+  type  ProjectType @default(todo)
+  order Float       @default(0)
+
+  userId String @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  columns Column[]
+  tasks   Task[]
+  notes   Note[]
+
+  image     String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([userId])
-  @@index([columnId])
 }
 
 model Column {
-  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  id    String @id @default(auto()) @map("_id") @db.ObjectId
+  title String
+  order Float  @default(0)
+
+  projectId String  @db.ObjectId
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  tasks Task[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([projectId])
+}
+
+model Task {
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
   title    String
-  order    Float    @default(0)
-  userId   String @db.ObjectId
-  user     User   @relation(fields: [userId], references: [id])
-  tasks    Task[]
+  content  String?
+  favorite Boolean @default(false)
+  state    Boolean @default(false) // is completed
+  order    Float   @default(0)
+
+  projectId String  @db.ObjectId
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  columnId String? @db.ObjectId // null = normal todo/task
+  column   Column? @relation(fields: [columnId], references: [id], onDelete: Cascade)
+
+  userId String @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([projectId])
+  @@index([columnId])
   @@index([userId])
 }
 
-model User {
-  id       String  @id @default(auto()) @map("_id") @db.ObjectId
-  username String
-  email    String  @unique
-  password String
-  isActive Boolean @default(false)
-  type     UserType @default(customer) 
-  phone    String? @unique
-  photo    String?
-  tasks    Task[]
-  columns  Column[]
+model Note {
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  title     String
+  content   String
+  projectId String  @db.ObjectId
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  userId String @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([projectId])
 }
 
-//--------------   enums -------------------------
+model AdminAction {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  adminId String @db.ObjectId
+  admin   User   @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  action String
+  data   Json
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([adminId])
+}
+
+enum ProjectType {
+  todo
+  project_tracker
+  meeting_notes
+  task_tracker
+}
+
 enum UserType {
   customer
   admin

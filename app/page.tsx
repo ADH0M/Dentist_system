@@ -1,3 +1,4 @@
+import Link from "next/link";
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
@@ -12,18 +13,18 @@ export default function Home() {
         </p>
         
         <div className="flex gap-4 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
-          <a 
-            href="/login" 
+          <Link
+            href="/user-dashboard" 
             className="px-8 py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors shadow-lg hover:shadow-xl"
           >
             Get Started
-          </a>
-          <a 
+          </Link>
+          <Link
             href="/about" 
             className="px-8 py-3 rounded-lg border border-border bg-card hover:bg-accent hover:text-accent-foreground transition-colors"
           >
             Learn More
-          </a>
+          </Link>
         </div>
       </section>
 

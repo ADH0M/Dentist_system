@@ -53,45 +53,49 @@ export default function Sidebar({ user }: { user?: User }) {
       {/* Navigation */}
       <nav className="flex-1 px-4 py-6 overflow-y-auto">
         <div className="mb-6">
-            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 px-4">Admin</h3>
-            <ul className="space-y-2">
+          <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 px-4">
+            Admin
+          </h3>
+          <ul className="space-y-2">
             {navItems.map((item) => (
-                <li key={item.href}>
+              <li key={item.href}>
                 <Link
-                    href={item.href}
-                    className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                  href={item.href}
+                  className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
                     pathname === item.href
-                        ? "bg-indigo-600 text-white shadow-lg"
-                        : "text-gray-300 hover:bg-gray-700 hover:text-white"
-                    }`}
+                      ? "bg-indigo-600 text-white shadow-lg"
+                      : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                  }`}
                 >
-                    <span className="text-lg">{item.icon}</span>
-                    <span className="font-medium">{item.name}</span>
+                  <span className="text-lg">{item.icon}</span>
+                  <span className="font-medium">{item.name}</span>
                 </Link>
-                </li>
+              </li>
             ))}
-            </ul>
+          </ul>
         </div>
 
         <div>
-            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 px-4">App</h3>
-            <ul className="space-y-2">
+          <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 px-4">
+            App
+          </h3>
+          <ul className="space-y-2">
             {appItems.map((item) => (
-                <li key={item.href}>
+              <li key={item.href}>
                 <Link
-                    href={item.href}
-                    className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                  href={item.href}
+                  className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
                     pathname === item.href
-                        ? "bg-indigo-600 text-white shadow-lg"
-                        : "text-gray-300 hover:bg-gray-700 hover:text-white"
-                    }`}
+                      ? "bg-indigo-600 text-white shadow-lg"
+                      : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                  }`}
                 >
-                    <span className="text-lg">{item.icon}</span>
-                    <span className="font-medium">{item.name}</span>
+                  <span className="text-lg">{item.icon}</span>
+                  <span className="font-medium">{item.name}</span>
                 </Link>
-                </li>
+              </li>
             ))}
-            </ul>
+          </ul>
         </div>
       </nav>
 

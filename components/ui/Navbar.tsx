@@ -3,8 +3,10 @@
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChangeEvent, useRef, useState } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import UserModal, { IControler } from "./UserModal";
+import { useDispatchHook, useSelectorHook } from "@/hooks/useSelector";
+import { fetchUser } from "@/store/reducers/auth";
 
 const links = [
   { path: "/", title: "Home", id: "8home8ii" },
@@ -12,11 +14,11 @@ const links = [
 ];
 
 type User = {
-  id: string |undefined;
-  username: string|undefined;
-  email: string|undefined;
-  role: string|undefined;
-  isActive: boolean|undefined;
+  id: string | undefined;
+  username: string | undefined;
+  email: string | undefined;
+  role: string | undefined;
+  isActive: boolean | undefined;
 } | null;
 
 export default function Navbar({ user }: { user?: User }) {
@@ -32,6 +34,13 @@ export default function Navbar({ user }: { user?: User }) {
   const handleChange = (e: ChangeEvent<HTMLSelectElement>) => {
     setTheme(e.target.value);
   };
+
+  const dispatch = useDispatchHook();
+  useEffect(() => {
+    if (user?.email && user.id) {
+      dispatch(fetchUser({ userId: user?.id, email: user?.email }));
+    }
+  }, [dispatch, user?.email, user?.id]);
 
   return (
     <nav className="sticky top-0 left-0 z-50 bg-sidebar border-b border-sidebar backdrop-blur-sm shadow-sm">
@@ -64,14 +73,14 @@ export default function Navbar({ user }: { user?: User }) {
             })}
 
             {user?.role === "admin" && (
-               <Link
-               href="/admin"
-               className={`font-normal text-sm ${
-                 pathname === "/admin" ? "border border-primary  " : ""
-               } rounded-md px-2 p-1 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground`}
-             >
-               Dashboard
-             </Link>
+              <Link
+                href="/admin"
+                className={`font-normal text-sm ${
+                  pathname === "/admin" ? "border border-primary  " : ""
+                } rounded-md px-2 p-1 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground`}
+              >
+                Dashboard
+              </Link>
             )}
 
             {/* Dark Mode Toggle */}
@@ -179,11 +188,11 @@ export default function Navbar({ user }: { user?: User }) {
                 {link.title}
               </Link>
             ))}
-            
+
             {user?.role === "admin" && (
-               <Link
-               href="/admin"
-               className={`block py-2 text-gray-700 hover:text-gray-900 
+              <Link
+                href="/admin"
+                className={`block py-2 text-gray-700 hover:text-gray-900 
                 dark:text-gray-300 dark:hover:text-white
                  font-medium   ${
                    pathname === "/admin"
@@ -191,10 +200,10 @@ export default function Navbar({ user }: { user?: User }) {
                      : "border-b border-accent-foreground "
                  }
                  dark:border-gray-800`}
-               onClick={toggleMenu}
-             >
-               Dashboard
-             </Link>
+                onClick={toggleMenu}
+              >
+                Dashboard
+              </Link>
             )}
 
             <div className="py-2 border-b border-gray-100 dark:border-gray-800">
@@ -230,10 +239,10 @@ export default function Navbar({ user }: { user?: User }) {
                   </Link>
                 </>
               ) : (
-                 <div className="py-2 text-center">
-                    <p className="font-medium">{user.username}</p>
-                    <p className="text-sm text-muted-foreground">{user.email}</p>
-                 </div>
+                <div className="py-2 text-center">
+                  <p className="font-medium">{user.username}</p>
+                  <p className="text-sm text-muted-foreground">{user.email}</p>
+                </div>
               )}
             </div>
           </div>
