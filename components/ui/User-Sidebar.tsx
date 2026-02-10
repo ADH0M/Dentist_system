@@ -16,7 +16,6 @@ import { userProjects } from "@/store/reducers/project";
 import { useDispatchHook, useSelectorHook } from "@/hooks/useSelector";
 import { Plus, Sidebar } from "lucide-react";
 import NewProjectBtn from "../layout/NewProjectBtn";
-import { ProjectsSkeleton } from "./skeleton";
 import { SidebarProjectsSection } from "./SidebarProjectItem";
 
 // أنواع
@@ -54,6 +53,10 @@ function UserSidebar({
 
   const { data } = useSelectorHook((state) => state.authReducer);
   const projects = useSelectorHook((state) => state.projectReducer);
+  let order = 1000;
+  if (projects.data && projects.data.length) {
+    order = Number(projects.data[projects.data?.length - 1].order);
+  }
   const dispatch = useDispatchHook();
 
   useEffect(() => {
@@ -162,6 +165,7 @@ function UserSidebar({
 
             <NewProjectBtn
               userId={data?.id}
+              order={order}
               className=" md:mt-0  font-medium bg-transparent text-secondary border-none shadow-sm 
             hover:brightness-105 transition "
               newClassName="text-red "
@@ -181,6 +185,7 @@ function UserSidebar({
                   title: p.title!,
                   order: p.order!,
                   type: p.type!,
+                  userId: p.userId!,
                   createdAt: p.createdAt!, // string
                 }))
               : null

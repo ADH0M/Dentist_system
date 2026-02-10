@@ -28,10 +28,11 @@ export const userProjects = createAsyncThunk(
   "getProjects/projects",
   async (userId: string, thunkAPI) => {
     try {
-      const res = await getProjects(userId);
-      console.log("res----------0-----------", res);
-
-      return res;
+      const res = await fetch(`/api/projects?userId=${userId}`, {
+        next: { tags: ["projects"] }, 
+      });
+      const data = await res.json()      
+      return data.data;
     } catch (error: any) {
       return thunkAPI.rejectWithValue(error.message || "Unknown error");
     }
@@ -49,7 +50,10 @@ const slice = createSlice({
   name: "project",
   initialState,
   reducers: {
-    todo(state, action) {},
+    reorderProjects: (state, action) => {
+      state.data = action.payload.data;
+      return state;
+    },
     project_tracker(state, action) {},
     task(state, action) {},
     meeting_notes(state, action) {},
@@ -60,12 +64,14 @@ const slice = createSlice({
         state.loading = true;
         state.error = false;
         state.errorMsg = undefined;
+        return state;
       })
       .addCase(
         userProjects.fulfilled,
         (state, action: PayloadAction<ITaskData[]>) => {
           state.loading = false;
           state.data = action.payload;
+          return state;
         }
       )
       .addCase(userProjects.rejected, (state, action) => {
@@ -73,10 +79,11 @@ const slice = createSlice({
         state.error = true;
         state.errorMsg = action.payload as string;
         state.data = [];
+        return state;
       });
   },
 });
 
 const projectReducer = slice.reducer;
-
+export const { reorderProjects } = slice.actions;
 export default projectReducer;

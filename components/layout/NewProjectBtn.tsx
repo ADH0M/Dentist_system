@@ -7,8 +7,10 @@ import {
   MenubarShortcut,
   MenubarTrigger,
 } from "@/components/ui/menubar";
+import { useDispatchHook } from "@/hooks/useSelector";
 import { createProject } from "@/lib/actions/projects";
 import { cn } from "@/lib/utils";
+import { userProjects } from "@/store/reducers/project";
 
 
 const NewProjectBtn = ({
@@ -19,6 +21,7 @@ const NewProjectBtn = ({
   sideOffset = 4,
   alignOffset = 0,
   userId,
+  order=1000,
 }: {
   className: string;
   newClassName?: string;
@@ -27,7 +30,10 @@ const NewProjectBtn = ({
   sideOffset?: number;
   alignOffset?: number;
   userId: string | undefined;
+  order:number;
 }) => {
+
+  const dispatch =useDispatchHook();
   return (
     <Menubar className={className}>
       <MenubarMenu>
@@ -46,7 +52,10 @@ const NewProjectBtn = ({
             className="p-1 md:p-3"
             onClick={async () => {
               const type = "todo";
-              if (userId) await createProject(type, userId);
+              if (userId) {
+                await createProject(type, userId,order)
+                dispatch(userProjects(userId));
+              };
             }}
           >
             Todo

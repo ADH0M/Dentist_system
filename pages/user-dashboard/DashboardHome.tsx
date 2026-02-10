@@ -102,16 +102,23 @@ export default function DashboardHome() {
     { title: "Simple Note App", status: "In Progress", tasks: 12 },
     { title: "Marketing Website", status: "Planning", tasks: 3 },
   ];
-  const {data} =useSelectorHook((state)=>state.authReducer)
+  const { data } = useSelectorHook((state) => state.authReducer);
+  const projects = useSelectorHook((state) => state.projectReducer);
+  let order = 1000;
+  if (projects.data && projects.data.length) {
+    order = Number(projects.data[projects.data?.length - 1].order);
+  }
   return (
     <div className="px-6 md:py-6 space-y-8 max-w-7xl mx-auto font-sans text-foreground bg-background">
       {/* Header */}
       <div className="flex flex-col md:flex-row items-center justify-between">
         <h1 className="text-3xl font-bold">Welcome back 👋</h1>
-        <NewProjectBtn 
-        userId={data?.id}
-        className="mt-4 md:mt-0 font-medium  text-secondary border border-primary shadow-sm hover:brightness-105
-         transition " />
+        <NewProjectBtn
+          userId={data?.id}
+          order={order}
+          className="mt-4 md:mt-0 font-medium  text-secondary border border-primary shadow-sm hover:brightness-105
+         transition "
+        />
       </div>
 
       {/* Project Types */}

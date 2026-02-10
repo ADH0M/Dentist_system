@@ -99,6 +99,7 @@ const UserModal = forwardRef<IControler, IProps>((props, ref) => {
                     </button>
                 </form>
             </div>
+            
           </div>
         </div>
       )}
