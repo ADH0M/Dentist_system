@@ -15,12 +15,12 @@ export default function Sidebar({ user }: { user?: User }) {
 
   const navItems = [
     { name: "Dashboard", href: "/admin", icon: "📊" },
-    { name: "Users", href: "/admin/users", icon: "👥" },
+    { name: "Patiant", href: "/admin/users", icon: "👥" },
   ];
 
   const appItems = [
-    { name: "Add Task", href: "/add-task", icon: "➕" },
-    { name: "My Notes", href: "/notes", icon: "📝" },
+    { name: "Add Assistant", href: "/", icon: "➕" },
+    { name: "My Notes", href: "/", icon: "📝" },
   ];
 
   return (
@@ -58,7 +58,7 @@ export default function Sidebar({ user }: { user?: User }) {
           </h3>
           <ul className="space-y-2">
             {navItems.map((item) => (
-              <li key={item.href}>
+              <li key={item.href+" "+item.name}>
                 <Link
                   href={item.href}
                   className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
@@ -81,7 +81,7 @@ export default function Sidebar({ user }: { user?: User }) {
           </h3>
           <ul className="space-y-2">
             {appItems.map((item) => (
-              <li key={item.href}>
+              <li key={item.href+" "+item.name}>
                 <Link
                   href={item.href}
                   className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${

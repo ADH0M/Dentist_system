@@ -2,7 +2,6 @@
 
 import NewProjectBtn from "@/components/layout/NewProjectBtn";
 import { useSelectorHook } from "@/hooks/useSelector";
-import Link from "next/link";
 import { FiFolder, FiList, FiUser } from "react-icons/fi";
 
 type CardProps = {

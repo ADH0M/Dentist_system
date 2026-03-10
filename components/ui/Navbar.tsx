@@ -5,12 +5,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import UserModal, { IControler } from "./UserModal";
-import { useDispatchHook, useSelectorHook } from "@/hooks/useSelector";
+import { useDispatchHook } from "@/hooks/useSelector";
 import { fetchUser } from "@/store/reducers/auth";
 
 const links = [
   { path: "/", title: "Home", id: "8home8ii" },
-  { path: "/notes", title: "Notes", id: "notes08ii" },
+  { path: "/assistent", title: "Assistent", id: "assistent89134" },
 ];
 
 type User = {
@@ -50,9 +50,9 @@ export default function Navbar({ user }: { user?: User }) {
           <div className="shrink-0">
             <Link
               href="/"
-              className="text-xl font-bold text-gray-800 dark:text-white"
+              className="text-xl font-bold  text-primary dark:text-primary"
             >
-              YourLogo
+              DR_Taha
             </Link>
           </div>
 
@@ -116,7 +116,7 @@ export default function Navbar({ user }: { user?: User }) {
                   onClick={() => {
                     openModal.current?.open();
                   }}
-                  className="text-xs text-secondary flex justify-center items-center  w-10 h-10 bg-accent rounded-full border border-accent-foreground cursor-pointer"
+                  className="text-xs text-primary flex justify-center items-center  w-10 h-10 bg-accent rounded-full border border-accent-foreground cursor-pointer"
                 >
                   {user.username?.charAt(0).toUpperCase()}
                 </span>

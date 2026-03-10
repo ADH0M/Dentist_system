@@ -8,9 +8,9 @@ const UserDashboard = async () => {
   const email = cookieStore.get("email")?.value;
   const role = cookieStore.get("role")?.value;
 
-  if (!username) {
-    redirect("/login");
-  }
+  // if (!username) {
+  //   redirect("/login");
+  // }
 
   return (
     <div className="p-6 max-w-7xl mx-auto">

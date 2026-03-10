@@ -5,77 +5,189 @@ generator client {
 
 datasource db {
   provider = "mongodb"
-  url = env("DATABASE_URL")
 }
 
+// ==========================================
+// 👤 Users & Authentication
+// ==========================================
 model User {
-  id       String   @id @default(auto()) @map("_id") @db.ObjectId
-  username String
-  email    String   @unique
-  password String
-  isActive Boolean  @default(false)
-  type     UserType @default(customer)
-  phone    String?  @unique
-  photo    String?
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  username  String
+  email     String   @unique
+  password  String   
+  role      UserType @default(assistant)
+  phone     String?  @unique
+  photo     String?
+  isActive  Boolean  @default(true)
 
-  projects  Project[]
-  notes     Note[]
-  tasks     Task[]
-  adminLogs AdminAction[]
+  // 🔗 ربط اختياري مع مريض (1-to-1)
+  patientProfile Patient? @relation("UserPatientLink", fields: [patientId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  patientId      String? @db.ObjectId @unique
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
+  // Relations - Tasks & Appointments
+  appointments Appointment[]
+  tasks        Task[]
+  activityLogs ActivityLog[]
+  invoices     Invoice[]
 
-model Project {
-  id    String      @id @default(auto()) @map("_id") @db.ObjectId
-  title String
-  type  ProjectType @default(todo)
-  order Float       @default(0)
-
-  userId String @db.ObjectId
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  columns Column[]
-  tasks   Task[]
-  notes   Note[]
-
-  image     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([userId])
-}
-
-model Column {
-  id    String @id @default(auto()) @map("_id") @db.ObjectId
-  title String
-  order Float  @default(0)
-
-  projectId String  @db.ObjectId
-  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-
-  tasks Task[]
+  // 🔁 Opposite Relations for Audit Fields (إصلاح خطأ العلاقات الناقصة)
+  createdPatients  Patient[]         @relation("PatientCreatedBy")
+  createdVisits    Visit[]           @relation("VisitCreatedBy")
+  uploadedImages   RadiologyImage[]  @relation("ImageUploadedBy")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([projectId])
+  @@index([role])
 }
 
+// ==========================================
+// 🏥 Patients (Medical Records)
+// ==========================================
+model Patient {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  phone     String
+  email     String?
+  birthDate DateTime?
+  gender    Gender?
+  address   String?
+
+  // 📋 Medical History Summary
+  allergies   String[] 
+  medications String[] 
+  notes       String?
+
+  // 🔗 علاقة عكسية مع User (بدون fields عشان نكسر الدورة)
+  user   User?   @relation("UserPatientLink")
+
+  // Relations
+  visits       Visit[] 
+  images       RadiologyImage[] 
+  invoices     Invoice[]
+  appointments Appointment[]
+
+  // 👮 Audit: مين سجل المريض ده؟
+  createdById String? @db.ObjectId
+  createdBy   User?   @relation("PatientCreatedBy", fields: [createdById], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([phone])
+  @@index([email])
+}
+
+// ==========================================
+// 📅 Appointments (Scheduling)
+// ==========================================
+model Appointment {
+  id        String            @id @default(auto()) @map("_id") @db.ObjectId
+  startTime DateTime
+  endTime   DateTime
+  status    AppointmentStatus @default(scheduled)
+  notes     String?
+
+  patientId String  @db.ObjectId
+  patient   Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  doctorId String @db.ObjectId
+  doctor   User   @relation(fields: [doctorId], references: [id])
+
+  // 🔗 ربط مع الزيارة (1-to-1) -> لازم @unique
+  visitId String? @db.ObjectId @unique
+  visit   Visit?  @relation(fields: [visitId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([doctorId, startTime])
+  @@index([patientId])
+  @@index([status])
+}
+
+// ==========================================
+// 🦷 Visits (Clinical Data - Per Visit)
+// ==========================================
+model Visit {
+  id             String    @id @default(auto()) @map("_id") @db.ObjectId
+  visitDate      DateTime  @default(now())
+  type           VisitType @default(Initial)
+  chiefComplaint String?
+
+  diagnosis      String?
+  treatmentPlan  String?
+  proceduresDone String?
+  
+  // 🦷 Tooth Charting Example:
+  // { "11": { "status": "caries", "surfaces": ["M", "O"] }, "16": "missing" }
+  toothChart     Json?
+
+  patientId String  @db.ObjectId
+  patient   Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  // 🔗 علاقات مع الفاتورة والميعاد
+  invoice     Invoice?
+  appointment Appointment?
+
+  // 👮 Audit
+  createdById String? @db.ObjectId
+  createdBy   User?   @relation("VisitCreatedBy", fields: [createdById], references: [id])
+
+  // 🗑️ Soft Delete
+  deletedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([patientId])
+  @@index([visitDate])
+}
+
+// ==========================================
+// 💰 Billing & Invoices
+// ==========================================
+model Invoice {
+  id            String         @id @default(auto()) @map("_id") @db.ObjectId
+  invoiceNumber String?        @unique
+  totalAmount   Float
+  paidAmount    Float          @default(0)
+  status        PaymentStatus  @default(pending)
+  paymentMethod PaymentMethod?
+  notes         String?
+  dueDate       DateTime?
+
+  patientId String  @db.ObjectId
+  patient   Patient @relation(fields: [patientId], references: [id], onDelete: Restrict)
+
+  // 🔗 ربط مع الزيارة (1-to-1) -> لازم @unique
+  visitId String? @db.ObjectId @unique
+  visit   Visit?  @relation(fields: [visitId], references: [id], onDelete: SetNull)
+
+  createdById String @db.ObjectId
+  createdBy   User   @relation(fields: [createdById], references: [id])
+
+  // 🗑️ Soft Delete
+  deletedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([patientId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// ==========================================
+// 📋 Internal Tasks
+// ==========================================
 model Task {
   id       String  @id @default(auto()) @map("_id") @db.ObjectId
   title    String
   content  String?
-  favorite Boolean @default(false)
-  state    Boolean @default(false) // is completed
-  order    Float   @default(0)
-
-  projectId String  @db.ObjectId
-  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-
-  columnId String? @db.ObjectId // null = normal todo/task
-  column   Column? @relation(fields: [columnId], references: [id], onDelete: Cascade)
+  isDone   Boolean @default(false)
+  priority Int     @default(1)
+  dueDate  DateTime?
 
   userId String @db.ObjectId
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -83,49 +195,101 @@ model Task {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([projectId])
-  @@index([columnId])
-  @@index([userId])
+  @@index([userId, isDone])
 }
 
-model Note {
-  id        String  @id @default(auto()) @map("_id") @db.ObjectId
-  title     String
-  content   String
-  projectId String  @db.ObjectId
-  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+// ==========================================
+// 🖼️ Radiology & Images
+// ==========================================
+model RadiologyImage {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  url         String
+  type        String?
+  description String?
+  toothNumber String?
+
+  patientId String  @db.ObjectId
+  patient   Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  // 👮 Audit: مين رفع الصورة؟
+  uploadedById String? @db.ObjectId
+  uploadedBy   User?   @relation("ImageUploadedBy", fields: [uploadedById], references: [id])
+
+  // 🗑️ Soft Delete
+  deletedAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([patientId])
+}
+
+// ==========================================
+// 📊 Activity Logs (Audit Trail)
+// ==========================================
+model ActivityLog {
+  id         String @id @default(auto()) @map("_id") @db.ObjectId
+  action     String
+  entityType String?
+  entityId   String? @db.ObjectId
+  details    Json?
+  ipAddress  String?
 
   userId String @db.ObjectId
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
-  @@index([projectId])
+  @@index([userId, createdAt])
+  @@index([entityType, entityId])
 }
 
-model AdminAction {
-  id      String @id @default(auto()) @map("_id") @db.ObjectId
-  adminId String @db.ObjectId
-  admin   User   @relation(fields: [adminId], references: [id], onDelete: Cascade)
-
-  action String
-  data   Json
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([adminId])
-}
-
-enum ProjectType {
-  todo
-  project_tracker
-  meeting_notes
-  task_tracker
-}
-
+// ==========================================
+// 📦 Enums
+// ==========================================
 enum UserType {
-  customer
   admin
+  dentist
+  assistant
+  receptionist
+}
+
+enum Gender {
+  male
+  female
+}
+
+enum VisitType {
+  Initial
+  FollowUp
+  Emergency
+  Cleaning
+  Consultation
+  Surgery
+}
+
+enum AppointmentStatus {
+  scheduled
+  confirmed
+  in_progress
+  completed
+  cancelled
+  no_show
+  rescheduled
+}
+
+enum PaymentStatus {
+  pending
+  paid
+  partially_paid
+  refunded
+  cancelled
+  insurance_pending
+}
+
+enum PaymentMethod {
+  Cash
+  Card
+  Online
+  Insurance
+  Installment
 }

@@ -1,6 +1,5 @@
 "use client";
 
-
 export default function AboutPage() {
   
   return (
@@ -65,7 +64,6 @@ export default function AboutPage() {
   );
 }
 
-// مكون منفصل للكارت
 const FeatureCard = ({
   title,
   description,

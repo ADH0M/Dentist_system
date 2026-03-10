@@ -34,3 +34,110 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+
+## ERD;
++----------------+      1            *      +----------------+
+|     User       |<------------------------->|   Appointment  |
+|----------------|                           |----------------|
+| id (PK)        | 1                      1  | id (PK)        |
+| username       |                           | startTime      |
+| email          |                           | endTime        |
+| password       |                           | status         |
+| role           |                           | patientId (FK) |
+| phone          |                           | doctorId (FK)  |
+| photo          |                           | visitId (FK)?  |
+| patientId (FK)?|                           +----------------+
++----------------+
+         | 1
+         |
+         | 0..1
+         |
+         v
++----------------+
+|    Patient     |
+|----------------|
+| id (PK)        |
+| firstName      |
+| lastName       |
+| phone          |
+| email          |
+| birthDate      |
+| gender         |
+| address        |
+| userId (FK)?   |
++----------------+
+        | 1
+        |
+        | *
+        v
++----------------+
+|     Visit      |
+|----------------|
+| id (PK)        |
+| visitDate      |
+| type           |
+| chiefComplaint |
+| diagnosis      |
+| treatmentPlan  |
+| proceduresDone |
+| patientId (FK) |
++----------------+
+        | 0..1
+        |
+        | 0..1
+        v
++----------------+
+|     Invoice    |
+|----------------|
+| id (PK)        |
+| invoiceNumber  |
+| totalAmount    |
+| patientId (FK) |
+| visitId (FK)?  |
++----------------+
+
+         ^                
+         | 1              
+         |                
+         | *              
++----------------+      
+| RadiologyImage |
+|----------------|
+| id (PK)        |
+| url            |
+| type           |
+| description    |
+| toothNumber    |
+| patientId (FK) |
++----------------+
+
+         ^
+         | *
+         |
++----------------+
+|     Task       |
+|----------------|
+| id (PK)        |
+| title          |
+| content        |
+| isDone         |
+| priority       |
+| dueDate        |
+| userId (FK)    |
++----------------+
+
+         ^
+         | *
+         |
++----------------+
+|  ActivityLog   |
+|----------------|
+| id (PK)        |
+| action         |
+| entityType     |
+| entityId       |
+| details (Json) |
+| ipAddress      |
+| userId (FK)    |
++----------------+
