@@ -1,15 +1,21 @@
-import ReceptionistDashboard from '@/components/layout/receptionist/Dashboard'
-import AssistantPatientForm from '@/pages/AssistantForm'
-import DrAssistantForm from '@/pages/DrAssistantForm'
+import ReceptionistDashboard from "@/components/layout/receptionist/Dashboard";
+import { getTodayPatients } from "@/lib/actions/patientActions";
+import AssistantPatientForm from "@/pages/AssistantForm";
+import DrAssistantForm from "@/pages/DrAssistantForm";
 
-const page = () => {
+const page = async () => {
+  const patients = await getTodayPatients();
+  console.log(patients);
+
   return (
     <>
-    <ReceptionistDashboard/>
-    {/* <AssistantPatientForm/>
+      {patients.success && (
+        <ReceptionistDashboard patients={patients.data} />
+      )}
+      {/* <AssistantPatientForm/>
     <DrAssistantForm/> */}
     </>
-  )
-}
+  );
+};
 
-export default page
+export default page;

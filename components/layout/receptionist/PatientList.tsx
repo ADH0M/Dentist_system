@@ -32,8 +32,8 @@ export function PatientList({ patients }: Props) {
         className="w-full max-w-md"
       />
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filtered.map(patient => (
-          <PatientCard key={patient.id} patient={patient} />
+        {filtered.map((patient ,ind)=> (
+          <PatientCard key={patient.id} patient={patient} num={ind}/>
         ))}
       </div>
     </div>

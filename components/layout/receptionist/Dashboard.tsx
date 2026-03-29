@@ -13,19 +13,11 @@ type Patient = {
   lastVisit?: string;
 };
 
-// Dummy Data
-const dummyPatients: Patient[] = [
-  { id: "1", name: "Ali Ahmed", phone: "01012345678", lastVisit: "2026-03-01" },
-  {
-    id: "2",
-    name: "Sara Mohamed",
-    phone: "01098765432",
-    lastVisit: "2026-02-25",
-  },
-  { id: "3", name: "Omar Khaled", phone: "01011223344" },
-];
-
-export default function ReceptionistDashboard() {
+export default function ReceptionistDashboard({
+  patients,
+}: {
+  patients: Patient[] | undefined;
+}) {
   const [selectedTab, setSelectedTab] = useState<
     "patients" | "appointments" | "visits"
   >("patients");
@@ -62,18 +54,20 @@ export default function ReceptionistDashboard() {
         <header className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Dashboard</h1>
           <div className="flex gap-2">
-            <AddPatientDialog
-              onAdd={(patient) => console.log("New Patient:", patient)}
-            />
-            <AddAppointmentDialog
-              patients={dummyPatients}
-              onAdd={(appt) => console.log("New Appointment:", appt)}
-            />
+            <AddPatientDialog />
+            {patients && (
+              <AddAppointmentDialog
+                patients={patients}
+                onAdd={(appt) => console.log("New Appointment:", appt)}
+              />
+            )}
           </div>
         </header>
 
         {/* Content based on tab */}
-        {selectedTab === "patients" && <PatientList patients={dummyPatients} />}
+        {selectedTab === "patients" && patients && (
+          <PatientList patients={patients} />
+        )}
 
         {selectedTab === "appointments" && (
           <div className="text-sm text-muted-foreground">
