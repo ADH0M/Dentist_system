@@ -1,6 +1,6 @@
+'use server';
 import { VisitType } from "@/generated/prisma";
 import prisma from "../db/db-connection";
-import { redirect } from "next/navigation";
 
 type VisitFormState = {
   success: boolean;
@@ -63,7 +63,7 @@ type VisitFormState = {
 // }
 
 export async function createPatientVisit(
-  { createBy, id }: { createBy: string; id: string },
+  { createBy, id }: { createBy: string |undefined; id: string },
   prevState: VisitFormState,
   formData: FormData,
 ): Promise<VisitFormState> {

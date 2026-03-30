@@ -1,8 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import React, { lazy, memo, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { PatientDetailsSheet } from "./PatientDetailsSheet"
+const PatientDetailsSheet = lazy(() => import("./PatientDetailsSheet"));
 
 type Patient = {
   id: string
@@ -13,7 +13,7 @@ type Patient = {
   gender?:string;
 }
 
-export function PatientCard({ patient ,num}: { patient: Patient,num:number }) {
+function PatientCard({ patient ,num}: { patient: Patient,num:number }) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -34,4 +34,6 @@ export function PatientCard({ patient ,num}: { patient: Patient,num:number }) {
       />
     </>
   )
-}
+};
+
+export default memo(PatientCard)

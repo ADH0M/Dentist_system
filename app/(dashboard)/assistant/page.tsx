@@ -4,9 +4,7 @@ import AssistantPatientForm from "@/pages/AssistantForm";
 import DrAssistantForm from "@/pages/DrAssistantForm";
 
 const page = async () => {
-  const patients = await getTodayPatients();
-  console.log(patients);
-
+  const patients = await getTodayPatients();  
   return (
     <>
       {patients.success && (

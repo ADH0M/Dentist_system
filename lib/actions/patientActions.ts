@@ -131,8 +131,10 @@ export async function getTodayPatients(): Promise<{
       orderBy: {
         createdAt: "asc",
       },
+      include: {
+        visits: true,
+      },
     });
-
     return {
       success: true,
       data: patients,
@@ -149,4 +151,28 @@ export async function getTodayPatients(): Promise<{
   }
 }
 
+export async function deletePatient({
+  id,
+}: {
+  id: string;
+}): Promise<PatientFormState> {
+  if ( !id) {
+    return { success: false, error: "patient id not exist or name" };
+  }
 
+  try {
+    const removePatient = await prisma.patient.delete({
+      where: { id, },
+    });
+
+    if (!removePatient) {
+      return { success: false, error: "patient alerady not exist i" };
+    }
+    revalidatePath("/patients");
+
+    return { success: true };
+  } catch (error) {
+    console.error("Database Error:", error);
+    return { success: false, error: "Fail to delete patient" };
+  }
+}
