@@ -18,7 +18,7 @@ type SignupFormState = {
 
 export async function registerAction(
   prevState: SignupFormState,
-  formData: FormData
+  formData: FormData,
 ): Promise<SignupFormState> {
   const username = formData.get("username") as string;
   const email = formData.get("email") as string;
@@ -82,7 +82,6 @@ export async function registerAction(
         password: hashedPassword,
       },
     });
-
   } catch (error: any) {
     console.error("Signup error:", error);
     return {
@@ -98,7 +97,7 @@ export async function registerAction(
 
 export async function loginUpAction(
   prevState: SignupFormState,
-  formData: FormData
+  formData: FormData,
 ): Promise<SignupFormState> {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
@@ -145,7 +144,7 @@ export async function loginUpAction(
       username: user.username,
       email: user.email,
       phone: user.phone,
-      role: user.type,
+      role: user.role,
       expireSesion: expireDate.toISOString(),
     });
 
@@ -161,8 +160,7 @@ export async function loginUpAction(
     cookieStore.set("userId", user.id);
     cookieStore.set("email", user.email);
     cookieStore.set("username", user.username);
-    cookieStore.set("role", user.type);
-
+    cookieStore.set("role", user.role);
   } catch (error: any) {
     console.error("Login error:", error);
     return {
@@ -179,6 +177,13 @@ export async function loginUpAction(
 export async function logoutAction() {
   try {
     const cookieStore = await cookies();
+    const email = cookieStore.get("email")?.value as string;
+    if (email) {
+      await prisma.user.update({
+        where: { email: email },
+        data: { isActive: false },
+      });
+    }
     cookieStore.delete("session");
     cookieStore.delete("userId");
     cookieStore.delete("email");
@@ -186,6 +191,7 @@ export async function logoutAction() {
     cookieStore.delete("role");
   } catch (error: any) {
     console.error("Logout error:", error);
+  } finally {
+    redirect("/login");
   }
-  redirect("/login");
 }

@@ -8,7 +8,7 @@ interface IUser {
   username: string;
   email: string;
   photo: string | null;
-  type: string;
+  role: string;
   phone: string | null;
 }
 
@@ -17,7 +17,8 @@ interface IState {
   error: boolean;
   errorMsg?: string | null;
   loading: boolean;
-}
+};
+
 const initialState: IState = {
   data: null,
   error: false,

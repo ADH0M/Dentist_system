@@ -10,7 +10,7 @@ import { fetchUser } from "@/store/reducers/auth";
 
 const links = [
   { path: "/", title: "Home", id: "8home8ii" },
-  { path: "/assistent", title: "Assistent", id: "assistent89134" },
+  { path: "/about", title: "About", id: "About92.89134" },
 ];
 
 type User = {
@@ -52,7 +52,7 @@ export default function Navbar({ user }: { user?: User }) {
               href="/"
               className="text-xl font-bold  text-primary dark:text-primary"
             >
-              DR_Taha
+              DR
             </Link>
           </div>
 
@@ -80,6 +80,17 @@ export default function Navbar({ user }: { user?: User }) {
                 } rounded-md px-2 p-1 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground`}
               >
                 Dashboard
+              </Link>
+            )}
+
+            {user?.role === "assistant" && (
+              <Link
+                href="/assistant"
+                className={`font-normal text-sm ${
+                  pathname === "/assistant" ? "border border-primary  " : ""
+                } rounded-md px-2 p-1 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground`}
+              >
+                Assistant
               </Link>
             )}
 
