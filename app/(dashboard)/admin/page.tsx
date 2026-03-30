@@ -28,15 +28,15 @@ const AdminDashboard = async () => {
       id: true,
       username: true,
       email: true,
-      type: true,
+      role: true,
       isActive: true,
     },
   });
 
   const totalUsers = users.length;
   const activeUsers = users.filter((u) => u.isActive).length;
-  const adminUsers = users.filter((u) => u.type === "admin").length;
-  const customerUsers = users.filter((u) => u.type === "customer").length;
+  const adminUsers = users.filter((u) => u.role === "admin").length;
+  const customerUsers = users.filter((u) => u.role === "assistant").length;
 
   return (
     <div className="flex min-h-screen ">
@@ -107,12 +107,12 @@ const AdminDashboard = async () => {
                     <td className="px-6 py-4">
                       <span
                         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          user.type === "admin"
+                          user.role === "admin"
                             ? "bg-purple-100 text-purple-800"
                             : "bg-blue-100 text-blue-800"
                         }`}
                       >
-                        {user.type}
+                        {user.role}
                       </span>
                     </td>
                     <td className="px-6 py-4">
@@ -133,14 +133,14 @@ const AdminDashboard = async () => {
                             action={updateUserRole.bind(
                               null,
                               user.id,
-                              user.type === "admin" ? "customer" : "admin",
+                              user.role === "admin" ? "assistant" : "admin",
                             )}
                           >
                             <button
                               type="submit"
                               className="text-xs px-3 py-1 rounded border border-border hover:bg-accent hover:text-white transition-colors"
                             >
-                              {user.type === "admin"
+                              {user.role === "admin"
                                 ? "Make Customer"
                                 : "Make Admin"}
                             </button>
@@ -192,12 +192,12 @@ const AdminDashboard = async () => {
                     <td className="px-6 py-4">
                       <span
                         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          user.type === "admin"
+                          user.role === "admin"
                             ? "bg-purple-100 text-purple-800"
                             : "bg-blue-100 text-blue-800"
                         }`}
                       >
-                        {user.type}
+                        {user.role}
                       </span>
                     </td>
                     <td className="px-6 py-4">
@@ -218,14 +218,14 @@ const AdminDashboard = async () => {
                             action={updateUserRole.bind(
                               null,
                               user.id,
-                              user.type === "admin" ? "customer" : "admin",
+                              user.role === "admin" ? "assistant" : "admin",
                             )}
                           >
                             <button
                               type="submit"
                               className="text-xs px-3 py-1 rounded border border-border hover:bg-accent hover:text-white transition-colors"
                             >
-                              {user.type === "admin"
+                              {user.role === "admin"
                                 ? "Make Customer"
                                 : "Make Admin"}
                             </button>

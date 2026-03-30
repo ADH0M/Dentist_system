@@ -8,7 +8,7 @@ export  const GET = async () => {
             email: true,
             phone: true,
             isActive: true,
-            type: true,
+            role: true,
             photo: true,
         },
     });

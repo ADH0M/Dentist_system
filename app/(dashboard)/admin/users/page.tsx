@@ -1,11 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { createUser, deleteUser, toggleUserActive, updateUserType } from "@/lib/actions/users";
-
-
-type UserType = "customer" | "admin";
+import { UserType } from "@/generated/prisma";
 
 interface User {
   id: string;
@@ -13,7 +12,7 @@ interface User {
   email: string;
   phone: string | null;
   isActive: boolean;
-  type: UserType;
+  role:UserType ;
   photo: string | null;
 }
 
@@ -22,7 +21,7 @@ const emptyUser: Omit<User, "id" | "photo"> = {
   email: "",
   phone: "",
   isActive: false,
-  type: "customer",
+  role: "assistant",
 };
 
 export default function AdminUsersPage() {
@@ -54,7 +53,7 @@ export default function AdminUsersPage() {
     formData.append("email", newUser.email);
     formData.append("password", "default123"); 
     if (newUser.phone) formData.append("phone", newUser.phone);
-    formData.append("type", newUser.type);
+    formData.append("type", newUser.role);
 
     try {
       await createUser(formData);
@@ -128,8 +127,8 @@ export default function AdminUsersPage() {
             <div>
               <label className="auth-label">Type</label>
               <select
-                value={newUser.type}
-                onChange={(e) => setNewUser({ ...newUser, type: e.target.value as UserType })}
+                value={newUser.role}
+                onChange={(e) => setNewUser({ ...newUser, role: e.target.value as UserType })}
                 className="auth-input"
               >
                 <option value="customer">Customer</option>
@@ -192,7 +191,7 @@ export default function AdminUsersPage() {
                   </td>
                   <td className="p-3">
                     <select
-                      value={user.type}
+                      value={user.role}
                       onChange={(e) => handleUpdateType(user.id, e.target.value as UserType)}
                       className="text-xs bg-transparent border border-border rounded px-2 py-1"
                     >

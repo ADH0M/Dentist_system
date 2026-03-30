@@ -1,5 +1,6 @@
 // app/admin/users/actions.ts
 "use server";
+import { UserType } from "@/generated/prisma";
 import prisma from "../db/db-connection";
 
 export async function createUser(formData: FormData) {
@@ -7,7 +8,7 @@ export async function createUser(formData: FormData) {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
   const phone = formData.get("phone") as string | null;
-  const type = formData.get("type") as "customer" | "admin";
+  const role = formData.get("type") as UserType;
 
   const hashedPassword = password;
   await prisma.user.create({
@@ -16,7 +17,7 @@ export async function createUser(formData: FormData) {
       email,
       password: hashedPassword,
       phone: phone || undefined,
-      type,
+      role,
       isActive: false,
     },
   });
@@ -34,15 +35,16 @@ export async function toggleUserActive(formData: FormData) {
   });
 }
 
-// export async function updateUserType(formData: FormData) {
-//   const userId = formData.get("userId") as string;
-//   const type = formData.get("type") as string;
+export async function updateUserType(formData: FormData) {
+  const userId = formData.get("userId") as string;
+  const role = formData.get("type") as UserType;
+  if(!role || !userId)return
 
-//   await prisma.user.update({
-//     where: { id: userId },
-//     data: { type },
-//   });
-// }
+  await prisma.user.update({
+    where: { id: userId },
+    data: { role },
+  });
+}
 
 export async function deleteUser(formData: FormData) {
   const userId = formData.get("userId") as string;
