@@ -34,15 +34,15 @@ export async function toggleUserActive(formData: FormData) {
   });
 }
 
-export async function updateUserType(formData: FormData) {
-  const userId = formData.get("userId") as string;
-  const type = formData.get("type") as "customer" | "admin";
+// export async function updateUserType(formData: FormData) {
+//   const userId = formData.get("userId") as string;
+//   const type = formData.get("type") as string;
 
-  await prisma.user.update({
-    where: { id: userId },
-    data: { type },
-  });
-}
+//   await prisma.user.update({
+//     where: { id: userId },
+//     data: { type },
+//   });
+// }
 
 export async function deleteUser(formData: FormData) {
   const userId = formData.get("userId") as string;
@@ -64,7 +64,7 @@ export async function getUser(userId: string, email: string) {
       username: true,
       email: true,
       photo: true,
-      type: true,
+      role: true,
       phone: true,
       isActive: true,
     },
@@ -74,5 +74,11 @@ export async function getUser(userId: string, email: string) {
     throw new Error("User not found or email mismatch");
   }
 
+  if (!user.isActive) {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { isActive: true },
+    });
+  }
   return user;
 }
