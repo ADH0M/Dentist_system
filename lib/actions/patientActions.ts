@@ -1,6 +1,6 @@
 "use server";
 
-import { Patient } from "@/generated/prisma";
+import { Patient, Prisma } from "@/generated/prisma";
 import prisma from "../db/db-connection";
 import { revalidatePath } from "next/cache";
 
@@ -110,9 +110,14 @@ export async function getLastDayPatients(): Promise<{
   }
 }
 
+
+export type PatientWithVisits = Prisma.PatientGetPayload<{
+  include: { visits: true };
+}>;
+
 export async function getTodayPatients(): Promise<{
   success: boolean;
-  data?: Patient[];
+  data?: PatientWithVisits[];
   error?: string;
   count?: number;
 }> {

@@ -7,27 +7,24 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { createPatientVisit } from "@/lib/actions/visit-action";
+import {
+  createPatientVisit,
+  deleteVisit,
+  updateVisit,
+} from "@/lib/actions/visit-action";
 import { memo, useActionState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { redirect } from "next/navigation";
 import { useSelectorHook } from "@/hooks/useSelector";
-import { VisitType } from "@/generated/prisma";
-import { deletePatient } from "@/lib/actions/patientActions";
-
-type Patient = {
-  id: string;
-  name: string;
-  phone?: string;
-  gender?: string;
-  visits?: VisitType;
-};
+import { deletePatient, PatientWithVisits } from "@/lib/actions/patientActions";
 
 type Props = {
-  patient: Patient;
+  patient: PatientWithVisits;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  componentType: "patient" | "appointment" | "visit";
 };
+
 const visitType = [
   "Initial",
   "FollowUp",
@@ -36,7 +33,13 @@ const visitType = [
   "Consultation",
   "Surgery",
 ];
-function PatientDetailsSheet({ patient, open, onOpenChange }: Props) {
+
+function PatientDetailsSheet({
+  patient,
+  open,
+  onOpenChange,
+  componentType,
+}: Props) {
   const intialState: { success: boolean; error?: string } = {
     success: false,
     error: "",
@@ -49,10 +52,32 @@ function PatientDetailsSheet({ patient, open, onOpenChange }: Props) {
     intialState,
   );
 
+  const [update, updateFormAction, updatePending] = useActionState(
+    updateVisit.bind(null, {
+      visitId: patient.visits.length
+        ? patient.visits[patient.visits.length - 1].id
+        : "",
+    }),
+    intialState,
+  );
+
   const [deleteState, deletePatientAction, deletePending] = useActionState(
     deletePatient.bind(null, { id: patient.id }),
     intialState,
   );
+
+  const handleDeleteVisit = async (id: string) => {
+    const res = await deleteVisit({
+      visitId: id,
+      deleteBy: createBy,
+    });
+
+    console.log(res);
+
+    if (!res.success && res.error === "redirect") {
+      redirect("/");
+    }
+  };
 
   useEffect(() => {
     if (state.success) {
@@ -66,28 +91,39 @@ function PatientDetailsSheet({ patient, open, onOpenChange }: Props) {
     }
   }, [state.success, state.error, onOpenChange]);
 
-  useEffect(()=>{
-    if(!deleteState.success){
+  useEffect(() => {
+    if (!deleteState.success) {
       setTimeout(() => {
         onOpenChange(false);
-      }, 500);  
+      }, 500);
     }
-  },[deleteState.success,onOpenChange]);
+  }, [deleteState.success, onOpenChange]);
+
+  useEffect(() => {
+    if (!update.success && update.error ==='redirect') {
+      setTimeout(() => {
+        onOpenChange(false);
+        redirect('/');
+      }, 500);
+    }
+  }, [update.success,update.error, onOpenChange]);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
         <SheetHeader>
           <SheetTitle className="text-2xl">{patient.name}</SheetTitle>
-          
-          <form
-            action={deletePatientAction}
-            className="flex justify-center items-center"
-          >
-            <button className="bg-red-400 w-fit h-fit px-2 text-sm py-1 rounded-xl cursor-pointer border border-transparent hover:border-border">
-              {deletePending ? "wait.." : "delete"}
-            </button>
-          </form>
+
+          {componentType === "patient" && (
+            <form
+              action={deletePatientAction}
+              className="flex justify-center items-center"
+            >
+              <button className="bg-red-400 w-fit h-fit px-2 text-sm py-1 rounded-xl cursor-pointer border border-transparent hover:border-border">
+                {deletePending ? "wait.." : "delete"}
+              </button>
+            </form>
+          )}
         </SheetHeader>
 
         <div className="space-y-6 px-4">
@@ -99,49 +135,128 @@ function PatientDetailsSheet({ patient, open, onOpenChange }: Props) {
             <p className="text-sm text-muted-foreground">
               gender: {patient.gender ?? "—"}
             </p>
+            {componentType === "visit" && (
+              <p className="text-sm text-muted-foreground">
+                last visit :{" "}
+                {patient.visits[patient.visits.length - 1].type || ""}
+              </p>
+            )}
           </div>
 
-          <div className="bg-card border border-border rounded-lg p-4 space-y-2">
-            <h3 className="font-semibold text-foreground">Appointments</h3>
-            {/* هنا نضيف AppointmentList لل patient */}
-            <p className="text-sm text-muted-foreground">No appointments yet</p>
-            <Button size="sm" className="mt-2">
-              Add Appointment
-            </Button>
-          </div>
-
-          <div className="bg-card border border-border rounded-lg p-4 space-y-2">
-            <h3 className="font-semibold text-foreground">Visits</h3>
-            {/* هنا نعرض Visits مختصر مع إمكانية فتح ToothChart */}
-            <p className="text-sm text-muted-foreground">
-              total visit :{" "}
-              {patient.visits?.length
-                ? patient.visits?.length
-                : "No visits yet"}
-            </p>
-
-            <form action={formAction}>
-              <Label>Visit Type</Label>
-              <select
-                name="type"
-                className="flex h-10 w-full sm:w-1/2 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 mt-1"
-                required
-              >
-                <option value="" disabled>
-                  Select Visit Type
-                </option>
-                {visitType.map((visit, indx) => (
-                  <option value={visit} key={visit + " " + indx}>
-                    {visit}
-                  </option>
-                ))}
-              </select>
-
-              <Button type="submit" className="mt-2">
-                {pending ? "Saving..." : "Add Visit"}
+          {componentType === "appointment" && (
+            <div className="bg-card border border-border rounded-lg p-4 space-y-2">
+              <h3 className="font-semibold text-foreground">Appointments</h3>
+              {/* هنا نضيف AppointmentList لل patient */}
+              <p className="text-sm text-muted-foreground">
+                No appointments yet
+              </p>
+              <Button size="sm" className="mt-2">
+                Add Appointment
               </Button>
-            </form>
-          </div>
+            </div>
+          )}
+
+          {componentType === "patient" && (
+            <div className="bg-card border border-border rounded-lg p-4 space-y-2">
+              <h3 className="font-semibold text-foreground">Visits</h3>
+              {/* هنا نعرض Visits مختصر مع إمكانية فتح ToothChart */}
+              <p className="text-sm text-muted-foreground">
+                total visit :{" "}
+                {patient.visits?.length
+                  ? patient.visits?.length
+                  : "No visits yet"}
+              </p>
+
+              <form action={formAction}>
+                <Label>Visit Type</Label>
+                <select
+                  name="type"
+                  className="flex h-10 w-full sm:w-1/2 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 mt-1"
+                  required
+                >
+                  <option value="" disabled>
+                    Select Visit Type
+                  </option>
+                  {visitType.map((visit, indx) => (
+                    <option value={visit} key={visit + " " + indx}>
+                      {visit}
+                    </option>
+                  ))}
+                </select>
+
+                <Button type="submit" className="mt-2">
+                  {pending ? "Saving..." : "Add Visit"}
+                </Button>
+              </form>
+            </div>
+          )}
+
+          {componentType === "visit" && (
+            <div className="bg-card border border-border rounded-lg p-4 space-y-2 relative w-full">
+              <h3 className="font-semibold text-foreground">Visits</h3>
+              <p className="text-sm text-muted-foreground">
+                total visit :{" "}
+                {patient.visits?.length
+                  ? patient.visits?.length
+                  : "No visits yet"}
+              </p>
+
+              <div className="border-border border-t border-b max-h-40 min-h-20 overflow-x-hidden overflow-y-scroll">
+                {patient.visits.length > 0 &&
+                  patient.visits.toReversed().map((visit, ind) => (
+                    <div
+                      key={visit.id}
+                      className="p-2 relative h-fit flex items-center overflow-hidden border-b border-transparent hover:border-border"
+                    >
+                      <p className="text-sm text-accent-foreground h-6 ">
+                        {ind + 1}: visit type : {visit.type || ""}
+                      </p>
+                      <div
+                        className={`absolute top-2 right-2  
+                              w-fit  text-sm h-fit `}
+                      >
+                        <button
+                          className={`w-full p-1 rounded-md h-full ${visit.createdAt.toLocaleDateString() === new Date().toLocaleDateString() ? "cursor-pointer" : "cursor-not-allowed"} 
+                          ${visit.createdAt.toLocaleDateString() === new Date().toLocaleDateString() ? "hover:bg-red-500" : "hover:bg-gray-400"}`}
+                          onClick={() => handleDeleteVisit(visit.id)}
+                          disabled={
+                            visit.createdAt.toLocaleDateString() !==
+                            new Date().toLocaleDateString()
+                          }
+                        >
+                          delete
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+
+              <form action={updateFormAction}>
+                <Label className="text-sm m-1">Update last Visit Type</Label>
+                <select
+                  name="type"
+                  className="flex h-10 w-full sm:w-1/2 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 mt-1"
+                  required
+                >
+                  <option value="" disabled>
+                    Select Visit Type
+                  </option>
+                  {visitType.map((visit, indx) => (
+                    <option value={visit} key={visit + " " + indx}>
+                      {visit}
+                    </option>
+                  ))}
+                </select>
+
+                <Button
+                  type="submit"
+                  className="mt-2 hover:text-accent cursor-pointer"
+                >
+                  {updatePending ? "Saving..." : "Update"}
+                </Button>
+              </form>
+            </div>
+          )}
         </div>
       </SheetContent>
     </Sheet>
