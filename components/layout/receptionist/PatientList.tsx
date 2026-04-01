@@ -3,20 +3,16 @@
 import { lazy, Suspense, useState } from "react";
 import { Input } from "@/components/ui/input";
 import FallbackPatientList from "./FallbackPatientList";
+import { PatientWithVisits } from "@/lib/actions/patientActions";
 
 const PatientCard = lazy(() => import("./PatientCard"));
-type Patient = {
-  id: string;
-  name: string;
-  phone?: string;
-  lastVisit?: string;
-};
 
 type Props = {
-  patients: Patient[];
+  patients: PatientWithVisits[];
+  componentType: "patient" | "appointment" | "visit";
 };
 
-export function PatientList({ patients }: Props) {
+export function PatientList({ patients, componentType = "patient" }: Props) {
   const [search, setSearch] = useState("");
 
   const filtered = patients.filter(
@@ -35,9 +31,21 @@ export function PatientList({ patients }: Props) {
       />
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <Suspense fallback={<FallbackPatientList />}>
-          {patients.length ? filtered.map((patient, ind) => (
-            <PatientCard key={patient.id} patient={patient} num={ind} />
-          )) :<div className="text-sm mt-1">there are no patient yet .</div>}
+          {patients.length ? (
+            filtered.map((patient, ind) => (
+              <PatientCard key={patient.id} patient={patient} num={ind} componentType={componentType}/>
+            ))
+          ) : (
+            <div className="text-sm mt-1">
+              there are no{" "}
+              {componentType === "patient"
+                ? "patients"
+                : componentType === "appointment"
+                  ? "appointments"
+                  : "visits"}{" "}
+              yet .
+            </div>
+          )}
         </Suspense>
       </div>
     </div>

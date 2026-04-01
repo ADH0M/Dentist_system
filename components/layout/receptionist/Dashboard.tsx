@@ -5,18 +5,14 @@ import { Button } from "@/components/ui/button";
 import { PatientList } from "./PatientList";
 import { AddPatientDialog } from "./AddPatientDialog";
 import { AddAppointmentDialog } from "./AddAppoitmentDailog";
+import { PatientWithVisits } from "@/lib/actions/patientActions";
 
-type Patient = {
-  id: string;
-  name: string;
-  phone?: string;
-  lastVisit?: string;
-};
+
 
 export default function ReceptionistDashboard({
   patients,
 }: {
-  patients: Patient[] | undefined;
+  patients: PatientWithVisits[] | undefined;
 }) {
   const [selectedTab, setSelectedTab] = useState<
     "patients" | "appointments" | "visits"
@@ -66,7 +62,7 @@ export default function ReceptionistDashboard({
 
         {/* Content based on tab */}
         {selectedTab === "patients" && patients && (
-          <PatientList patients={patients} />
+          <PatientList patients={patients} componentType="patient"/>
         )}
 
         {selectedTab === "appointments" && (
@@ -76,10 +72,10 @@ export default function ReceptionistDashboard({
           </div>
         )}
 
-        {selectedTab === "visits" && (
+        {selectedTab === "visits" && patients && (
           <div className="text-sm text-muted-foreground">
             {/* Placeholder for Visits Table / List */}
-            Visits List will appear here
+            <PatientList patients={patients.filter((p)=>p.visits.length)} componentType="visit"/>
           </div>
         )}
       </main>
