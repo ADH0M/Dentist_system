@@ -17,6 +17,8 @@ import { Label } from "@/components/ui/label";
 import { redirect } from "next/navigation";
 import { useSelectorHook } from "@/hooks/useSelector";
 import { deletePatient, PatientWithVisits } from "@/lib/actions/patientActions";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 type Props = {
   patient: PatientWithVisits;
@@ -100,13 +102,13 @@ function PatientDetailsSheet({
   }, [deleteState.success, onOpenChange]);
 
   useEffect(() => {
-    if (!update.success && update.error ==='redirect') {
+    if (!update.success && update.error === "redirect") {
       setTimeout(() => {
         onOpenChange(false);
-        redirect('/');
+        redirect("/");
       }, 500);
     }
-  }, [update.success,update.error, onOpenChange]);
+  }, [update.success, update.error, onOpenChange]);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -183,6 +185,28 @@ function PatientDetailsSheet({
                     </option>
                   ))}
                 </select>
+                <Label className="mt-2">Paid</Label>
+                <Input
+                  name="totalAmount"
+                  type="number"
+                  className="flex h-10 mt-2  w-full sm:w-1/2 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none
+                   focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 "
+                  max={2000}
+                  min={10}
+                  required
+                  placeholder="amount eg.200"
+                />
+
+                <div>
+                  <Label className="mt-2">note for paid</Label>
+                  <Textarea
+                    name="note_paid"
+                    maxLength={200}
+                    minLength={4}
+                    className="mt-2"
+                    placeholder="add note about paid..."
+                  ></Textarea>
+                </div>
 
                 <Button type="submit" className="mt-2">
                   {pending ? "Saving..." : "Add Visit"}

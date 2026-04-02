@@ -82,3 +82,6 @@ export default function ReceptionistDashboard({
     </div>
   );
 }
+// invoce 
+// doctor dashboard  
+// patient page 

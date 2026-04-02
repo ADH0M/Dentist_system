@@ -166,13 +166,13 @@ export async function deletePatient({
   }
 
   try {
-    const removePatient = await prisma.patient.delete({
-      where: { id, },
-    });
+    await prisma.$transaction(async(x)=>{
+      await x.patient.delete({
+        where: { id, },
+      });
+      
+    })
 
-    if (!removePatient) {
-      return { success: false, error: "patient alerady not exist i" };
-    }
     revalidatePath("/patients");
 
     return { success: true };

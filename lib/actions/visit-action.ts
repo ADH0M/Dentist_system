@@ -3,7 +3,7 @@ import { Visit, VisitType } from "@/generated/prisma";
 import prisma from "../db/db-connection";
 import { revalidatePath } from "next/cache";
 
-type VisitFormState = {
+export type VisitFormState = {
   success: boolean;
   error?: string;
 };
@@ -70,6 +70,9 @@ export async function createPatientVisit(
 ): Promise<VisitFormState> {
   try {
     const type = formData.get("type") as VisitType;
+    const totalAmount = formData.get("totalAmount") as string;
+    const note_paid = formData.get("note_paid") as string;
+
     const isType = [
       "Initial",
       "FollowUp",
@@ -77,17 +80,35 @@ export async function createPatientVisit(
       "Cleaning",
       "Consultation",
       "Surgery",
-    ].find((t) => t === type);
+    ];
 
-    if (!isType) return { success: false, error: "type is not define " };
+    if (!isType.includes(type))
+      return { success: false, error: "type is not define " };
+    if (isNaN(Number(totalAmount)) && Number(totalAmount) < 20)
+      return { success: false, error: "totalAmount is not define " };
     if (!createBy) {
       return { success: false, error: "redirect" };
     }
     if (!id) return { success: false, error: "patient not define " };
 
-    await prisma.visit.create({
-      data: { patientId: id, type, createdById: createBy },
+    await prisma.$transaction(async (x) => {
+      const currnetVisit = await x.visit.create({
+        data: { patientId: id, type, createdById: createBy },
+      });
+      const invoiceNumber = `INV-${Date.now()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+
+      await x.invoice.create({
+        data: {
+          totalAmount: Number(totalAmount),
+          createdById: createBy,
+          patientId: currnetVisit.patientId,
+          notes: note_paid || "",
+          visitId: currnetVisit.id,
+          invoiceNumber,
+        },
+      });
     });
+
     revalidatePath("/patients");
 
     return { success: true };
@@ -185,10 +206,12 @@ export async function deleteVisit({
   }
 
   try {
-    await prisma.visit.delete({
-      where: { id: visitId },
+    await prisma.$transaction(async (x) => {
+      await x.invoice.delete({ where: { visitId } });
+      await x.visit.delete({
+        where: { id: visitId },
+      });
     });
-
     revalidatePath("patients");
     return {
       success: true,
@@ -223,7 +246,7 @@ export async function updateVisit(
       where: { id: visitId },
       data: { type: newType },
     });
-    revalidatePath('patients')
+    revalidatePath("patients");
     return {
       success: true,
     };
