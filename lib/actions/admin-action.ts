@@ -4,27 +4,43 @@ import { UserType } from "@/generated/prisma";
 import prisma from "@/lib/db/db-connection";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
+import { PatientFormState } from "./patientActions";
 
-
-
-
-export async function deleteUser(userId: string) {
+export async function deleteUser({
+  id,
+}: {
+  id: string;
+}): Promise<PatientFormState> {
   const cookieStore = await cookies();
   const role = cookieStore.get("role")?.value;
 
   if (role !== "admin") {
-    throw new Error("Unauthorized");
+    return {
+      success: false,
+      error: "user id is required",
+    };
   }
 
+  if (!id)
+    return {
+      success: false,
+      error: "user id is required",
+    };
+
   try {
-  
     await prisma.user.delete({
-      where: { id: userId },
+      where: { id: id },
     });
     revalidatePath("/admin");
+    return {
+      success: true,
+    };
   } catch (error) {
     console.error("Failed to delete user:", error);
-    throw new Error("Failed to delete user");
+    return {
+      success: false,
+      error: "error",
+    };
   }
 }
 
@@ -34,6 +50,10 @@ export async function updateUserRole(userId: string, newRole: UserType) {
 
   if (role !== "admin") {
     throw new Error("Unauthorized");
+  };
+  
+  if(!userId){
+    throw new Error('user undefined');
   }
 
   try {
