@@ -11,18 +11,18 @@ datasource db {
 // 👤 Users & Authentication
 // ==========================================
 model User {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  username  String
-  email     String   @unique
-  password  String   
-  role      UserType @default(assistant)
-  phone     String?  @unique
-  photo     String?
-  isActive  Boolean  @default(true)
+  id       String   @id @default(auto()) @map("_id") @db.ObjectId
+  username String
+  email    String   @unique
+  password String
+  role     UserType @default(assistant)
+  phone    String?  @unique
+  photo    String?
+  isActive Boolean  @default(true)
 
   // 🔗 ربط اختياري مع مريض (1-to-1)
   patientProfile Patient? @relation("UserPatientLink", fields: [patientId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  patientId      String? @db.ObjectId @unique
+  patientId      String?  @unique @db.ObjectId
 
   // Relations - Tasks & Appointments
   appointments Appointment[]
@@ -95,7 +95,7 @@ model Appointment {
   doctor   User   @relation(fields: [doctorId], references: [id])
 
   // 🔗 ربط مع الزيارة (1-to-1) -> لازم @unique
-  visitId String? @db.ObjectId @unique
+  visitId String? @unique @db.ObjectId
   visit   Visit?  @relation(fields: [visitId], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
@@ -118,7 +118,7 @@ model Visit {
   diagnosis      String?
   treatmentPlan  String?
   proceduresDone String?
-  
+
   // 🦷 Tooth Charting Example:
   // { "11": { "status": "caries", "surfaces": ["M", "O"] }, "16": "missing" }
   toothChart     Json?
@@ -161,7 +161,7 @@ model Invoice {
   patient   Patient @relation(fields: [patientId], references: [id], onDelete: Restrict)
 
   // 🔗 ربط مع الزيارة (1-to-1) -> لازم @unique
-  visitId String? @db.ObjectId @unique
+  visitId String? @unique @db.ObjectId
   visit   Visit?  @relation(fields: [visitId], references: [id], onDelete: SetNull)
 
   createdById String @db.ObjectId
@@ -251,6 +251,7 @@ enum UserType {
   dentist
   assistant
   receptionist
+  patient
 }
 
 enum Gender {

@@ -174,6 +174,7 @@ export async function deletePatient({
     })
 
     revalidatePath("/patients");
+    revalidatePath("/admin");
 
     return { success: true };
   } catch (error) {
