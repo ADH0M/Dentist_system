@@ -1,24 +1,14 @@
 "use client";
-import { registerAction } from "@/lib/actions/auth-action";
+import { registerAction, SignupFormState } from "@/lib/actions/auth-action";
 import Link from "next/link";
 import { useActionState } from "react";
 
-const initialState: {
-  message: string;
-  errors?: {
-    username?: string[];
-    email?: string[];
-    phone?: string[];
-    password?: string[];
-    confirmPassword?: string[];
-    general?: string;
-  };
-} = { message: "" };
+const initialState: SignupFormState = { message: "" };
 
 export default function Signup() {
   const [state, formAction, isPending] = useActionState(
     registerAction,
-    initialState
+    initialState,
   );
 
   return (
@@ -71,6 +61,25 @@ export default function Signup() {
               />
               <p className="auth-notvalid">
                 {state.errors?.email && state.errors.email[0]}
+              </p>
+            </div>
+
+            {/* Phone */}
+            <div className="md:w-[90%] w-full">
+              <label htmlFor="email" className="auth-label ">
+                Email Address
+              </label>
+              <input
+                type="tel"
+                id="phone"
+                name="phone"
+                className="auth-input"
+                placeholder="+20 110 144 044"
+                max={11}
+                min={11}
+              />
+              <p className="auth-notvalid">
+                {state.errors?.phone && state.errors.phone[0]}
               </p>
             </div>
 

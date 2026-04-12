@@ -1,36 +1,12 @@
 import prisma from "@/lib/db/db-connection";
 import { cookies } from "next/headers";
-import Sidebar from "@/components/Aside";
 import { UserType } from "@/generated/prisma";
 import GenericAdminTable, { Action } from "@/components/layout/admin/UserTabel";
 import { Columns } from "@/components/layout/admin/GenericTable";
 import { deletePatient } from "@/lib/actions/patientActions";
 import StafTable from "@/components/layout/admin/StafTable";
-import { redirect } from "next/navigation";
 
 const AdminDashboard = async () => {
-  const cookieStore = await cookies();
-  const role = cookieStore.get("role")?.value as UserType;
-  const currentUserId = cookieStore.get("userId")?.value;
-  const username = cookieStore.get("username")?.value;
-  const email = cookieStore.get("email")?.value;
-
-  if (role === "patient" && role) {
-    redirect("/patient");
-  }
-
-  if (role !== "admin") {
-    redirect("/");
-  }
-
-  const currentUser = {
-    id: currentUserId || "",
-    username: username || "",
-    email: email || "",
-    role: role || "",
-    isActive: true,
-  };
-
   const users = await prisma.user.findMany({
     select: {
       id: true,
@@ -89,73 +65,75 @@ const AdminDashboard = async () => {
   ) as Columns<(typeof users)[number]>[];
 
   //add srotable , render ,aviod id
-  const patientColumns = (
-    Object.keys(patients[0]) as (keyof (typeof patients)[number])[]
-  ).map((pro) => {
-    if (pro === "name") {
-      return {
-        key: pro,
-        label: pro,
-        sortable: true,
-      };
-    } else {
-      return {
-        key: pro,
-        label: pro,
-      };
-    }
-  });
+  const patientColumns = patients.length
+    ? (Object.keys(patients[0]) as (keyof (typeof patients)[number])[]).map(
+        (pro) => {
+          if (pro === "name") {
+            return {
+              key: pro,
+              label: pro,
+              sortable: true,
+            };
+          } else {
+            return {
+              key: pro,
+              label: pro,
+            };
+          }
+        },
+      )
+    : [];
 
   return (
-    <div className="flex min-h-screen ">
-      <Sidebar user={currentUser} />
-      <div className="p-6 flex-1 mx-auto">
-        <h1 className="text-3xl font-bold mb-8 text-accent-foreground">
-          Admin Dashboard
-        </h1>
+    <div className="p-6 flex-1 mx-auto">
+      <h1 className="text-3xl font-bold mb-8 text-accent-foreground">
+        Admin Dashboard
+      </h1>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-card p-6 rounded-xl shadow-sm border border-border">
-            <h3 className="text-muted-foreground text-sm font-medium">
-              Total Users
-            </h3>
-            <p className="text-3xl font-bold mt-2">{totalUsers}</p>
-          </div>
-          <div className="bg-card p-6 rounded-xl shadow-sm border border-border">
-            <h3 className="text-muted-foreground text-sm font-medium">
-              Patients
-            </h3>
-            <p className="text-3xl font-bold mt-2">{patientUsers}</p>
-          </div>
-          <div className="bg-card p-6 rounded-xl shadow-sm border border-border">
-            <h3 className="text-muted-foreground text-sm font-medium">
-              Receptionist
-            </h3>
-            <p className="text-3xl font-bold mt-2 text-purple-600">
-              {receptionist.length}
-            </p>
-          </div>
-          <div className="bg-card p-6 rounded-xl shadow-sm border border-border">
-            <h3 className="text-muted-foreground text-sm font-medium">
-              assistant
-            </h3>
-            <p className="text-3xl font-bold mt-2 text-blue-600">
-              {assistant.length}
-            </p>
-          </div>
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 sm:gap-4 md:grid-cols-4 gap-6 mb-8">
+        <div className="bg-card p-6 rounded-xl shadow-sm border border-border">
+          <h3 className="text-muted-foreground text-sm font-medium">
+            Total Users
+          </h3>
+          <p className="text-3xl font-bold mt-2">{totalUsers}</p>
         </div>
+        <div className="bg-card p-6 rounded-xl shadow-sm border border-border">
+          <h3 className="text-muted-foreground text-sm font-medium">
+            Patients
+          </h3>
+          <p className="text-3xl font-bold mt-2">{patientUsers}</p>
+        </div>
+        <div className="bg-card p-6 rounded-xl shadow-sm border border-border">
+          <h3 className="text-muted-foreground text-sm font-medium">
+            Receptionist
+          </h3>
+          <p className="text-3xl font-bold mt-2 text-purple-600">
+            {receptionist.length}
+          </p>
+        </div>
+        <div className="bg-card p-6 rounded-xl shadow-sm border border-border">
+          <h3 className="text-muted-foreground text-sm font-medium">
+            assistant
+          </h3>
+          <p className="text-3xl font-bold mt-2 text-blue-600">
+            {assistant.length}
+          </p>
+        </div>
+      </div>
 
-        {/* staf Table */}
-        <StafTable users={users} />
-        {/* Patiant Table */}
+      {/* staf Table */}
+      <StafTable users={users} />
+      {/* Patiant Table */}
+
+      {patients.length >= 0 && (
         <GenericAdminTable
           title="Patients"
           columns={patientColumns}
           data={patients}
           actions={pationtActions}
         />
-      </div>
+      )}
     </div>
   );
 };
