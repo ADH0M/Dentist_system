@@ -137,7 +137,7 @@ export default function GenericAdminTable<T>({
 
       {/* Table */}
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-sm">
+        <table className="min-w-full w-full text-left text-sm border-separate table-auto ">
           <thead className="bg-muted/50 text-muted-foreground">
             <tr>
               {columns.map((col) => (
@@ -199,7 +199,7 @@ export default function GenericAdminTable<T>({
                       );
                     })}
                     {actions.length > 0 && (
-                      <td className="px-6 py-4 text-right flex justify-end gap-2">
+                      <td className="px-6 py-4 text-right flex justify-end gap-2 truncate">
                         {actions.map((act) => {
                           if (act.label.toLocaleLowerCase() === "edite") {
                             // eslint-disable-next-line @typescript-eslint/no-explicit-any

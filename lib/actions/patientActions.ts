@@ -110,7 +110,6 @@ export async function getLastDayPatients(): Promise<{
   }
 }
 
-
 export type PatientWithVisits = Prisma.PatientGetPayload<{
   include: { visits: true };
 }>;
@@ -161,17 +160,26 @@ export async function deletePatient({
 }: {
   id: string;
 }): Promise<PatientFormState> {
-  if ( !id) {
+  if (!id) {
     return { success: false, error: "patient id not exist or name" };
   }
 
   try {
-    await prisma.$transaction(async(x)=>{
-      await x.patient.delete({
-        where: { id, },
+    await prisma.$transaction(async (x) => {
+      const del = await x.user.findUnique({
+        where: { patientId: id },
       });
-      
-    })
+
+      if (del) {
+        await x.user.delete({
+          where: { patientId: id },
+        });
+      }
+
+      await x.patient.delete({
+        where: { id },
+      });
+    });
 
     revalidatePath("/patients");
     revalidatePath("/admin");

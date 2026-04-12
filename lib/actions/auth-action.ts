@@ -5,11 +5,12 @@ import { cookies } from "next/headers";
 import prisma from "../db/db-connection";
 import bcrypt from "bcryptjs";
 
-type SignupFormState = {
+export type SignupFormState = {
   message?: string;
   errors?: {
     username?: string[];
     email?: string[];
+    phone?: string[];
     password?: string[];
     confirmPassword?: string[];
     general?: string;
@@ -23,10 +24,12 @@ export async function registerAction(
   const username = formData.get("username") as string;
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
+  const phone = formData.get("phone") as string;
   const confirmPassword = formData.get("confirmPassword") as string;
 
   // Validation
   const errors: {
+    phone?: string[];
     username?: string[];
     email?: string[];
     password?: string[];
@@ -57,12 +60,23 @@ export async function registerAction(
     hasErrors = true;
   }
 
+  if (phone.length !== 11) {
+    errors.phone = ["phone must be 11 numbers."];
+    hasErrors = true;
+  }
+
   if (hasErrors) {
     return { message: "Validation failed.", errors };
   }
 
   try {
-    const existingUser = await prisma.user.findUnique({ where: { email } });
+    let existingUser = false;
+    await prisma.$transaction(async (t) => {
+      const findUser = await prisma.user.findUnique({ where: { email } });
+      const findPatinet = await prisma.user.findFirst({ where: { email } });
+
+      if (findPatinet || findUser) existingUser = true;
+    });
 
     if (existingUser) {
       return {
@@ -73,14 +87,43 @@ export async function registerAction(
       };
     }
 
+    let existingPhone = false;
+    await prisma.$transaction(async (t) => {
+      const findUser = await prisma.user.findUnique({ where: { phone } });
+      const findPatinet = await prisma.user.findFirst({ where: { phone } });
+
+      if (findPatinet || findUser) existingPhone = true;
+    });
+
+    if (existingPhone) {
+      return {
+        message: "P already exists.",
+        errors: {
+          general: "An account with this phone already exists.",
+        },
+      };
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    await prisma.user.create({
-      data: {
-        email,
-        username,
-        password: hashedPassword,
-      },
+    await prisma.$transaction(async (t) => {
+      const patient = await t.patient.create({
+        data: {
+          email,
+          name: username,
+          phone,
+        },
+      });      
+      await t.user.create({
+        data: {
+          email,
+          username,
+          password: hashedPassword,
+          role: "patient",
+          patientId: patient.id,
+          phone
+        },
+      });
     });
   } catch (error: any) {
     console.error("Signup error:", error);

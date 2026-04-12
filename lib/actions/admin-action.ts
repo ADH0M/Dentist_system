@@ -42,7 +42,7 @@ export async function deleteUser({
       error: "error",
     };
   }
-}
+};
 
 export async function updateUserRole(userId: string, newRole: UserType) {
   const cookieStore = await cookies();
@@ -66,4 +66,6 @@ export async function updateUserRole(userId: string, newRole: UserType) {
     console.error("Failed to update user role:", error);
     throw new Error("Failed to update user role");
   }
-}
+};
+
+
