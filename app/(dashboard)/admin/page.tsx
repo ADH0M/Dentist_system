@@ -1,6 +1,4 @@
 import prisma from "@/lib/db/db-connection";
-import { cookies } from "next/headers";
-import { UserType } from "@/generated/prisma";
 import GenericAdminTable, { Action } from "@/components/layout/admin/UserTabel";
 import { Columns } from "@/components/layout/admin/GenericTable";
 import { deletePatient } from "@/lib/actions/patientActions";
@@ -21,7 +19,6 @@ const AdminDashboard = async () => {
     select: { name: true, phone: true, gender: true, id: true },
   });
 
-  type PatientType = (typeof patients)[number];
 
   const pationtActions: Action[] = [
     {
