@@ -9,6 +9,18 @@ export type PatientFormState = {
   error?: string;
 };
 
+export type GetPatientType = {
+  success: boolean;
+  data?: P_VisitsInvoicesImages;
+  msg?: string;
+  error?: boolean;
+  redirect?: boolean;
+};
+
+export type P_VisitsInvoicesImages = Prisma.PatientGetPayload<{
+  include: { visits: true; images: true; invoices: true };
+}>;
+
 export async function createPatient(
   prevState: PatientFormState,
   formData: FormData,
@@ -55,9 +67,41 @@ export async function createPatient(
   }
 }
 
-export async function getPatient() {
+export async function getPatient(id: string): Promise<GetPatientType> {
+  if (!id) {
+    return {
+      success: false,
+      error: true,
+      msg: "patient id not exist",
+      redirect: true,
+    };
+  }
+
   try {
-  } catch (error) {}
+    const pateint = await prisma.patient.findUnique({
+      where: { id },
+      include: {
+        visits: true,
+        images: true,
+        invoices: true,
+      },
+    });
+
+    if (!pateint) {
+      return {
+        success: false,
+        msg: "patient not exist",
+        redirect: true,
+        error: false,
+      };
+    }
+
+    console.log(pateint);
+
+    return { success: true, data: pateint };
+  } catch (error) {
+    return { success: false, msg: "try again ", error: true };
+  }
 }
 
 function getDateRange(daysAgo: number) {

@@ -20,7 +20,8 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { AddAssistant } from "@/pages/assistant/AddAssistant";
+import  AddAssistant  from "@/pages/assistant/AddAssistant";
+
 
 type User = {
   id: string;

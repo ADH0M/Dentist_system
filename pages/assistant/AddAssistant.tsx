@@ -33,7 +33,7 @@ export type AddAssistantState = {
   message?: string;
 };
 
-export function AddAssistant() {
+export default function AddAssistant() {
   const initialState: AddAssistantState = {
     success: false,
     error: "",

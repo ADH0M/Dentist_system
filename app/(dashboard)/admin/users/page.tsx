@@ -55,16 +55,16 @@ export default function AdminUsersPage() {
     if (newUser.phone) formData.append("phone", newUser.phone);
     formData.append("type", newUser.role);
 
-    try {
-      await createUser(formData);
-      setNewUser(emptyUser);
-      const res = await fetch("/api/admin/users");
-      setUsers(await res.json());
-    } catch (error) {
-      alert("Failed to create user");
-    } finally {
-      setSubmitting(false);
-    }
+    // try {
+    //   await createUser(_,formData);
+    //   setNewUser(emptyUser);
+    //   const res = await fetch("/api/admin/users");
+    //   setUsers(await res.json());
+    // } catch (error) {
+    //   alert("Failed to create user");
+    // } finally {
+    //   setSubmitting(false);
+    // }
   };
 
   const handleToggleActive = async (userId: string, isActive: boolean) => {

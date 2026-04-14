@@ -1,8 +1,6 @@
-type OverviewTabProps = {
-  patientId: string
-}
 
-export function OverviewTab({ patientId }: OverviewTabProps) {
+
+export function OverviewTab() {
   return (
     <div className="grid gap-4 md:grid-cols-2">
 

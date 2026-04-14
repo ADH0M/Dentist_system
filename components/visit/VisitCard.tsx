@@ -1,43 +1,35 @@
 "use client";
 
-
+import { Visit } from "@/generated/prisma";
 import { memo, useState } from "react";
-import  VisitDetailsSheet  from "../visitDetailsSheet/VisitDetailsSheet";
 
-type Visit = {
-  id: string;
-  visitDate: string;
-  chiefComplaint?: string;
-  diagnosis?: string;
-  treatmentPlan?: string;
-  doctor?: string;
-};
-
- function VisitCard({ visit }: { visit: Visit }) {
-
-  const [open, setOpen] = useState(false)
+function VisitCard({ visit }: { visit: Visit }) {
+  const [open, setOpen] = useState(false);
 
   return (
     <>
       <div
         onClick={() => setOpen(true)}
-        className="bg-card border border-border rounded-lg shadow-sm p-4 flex flex-col gap-3 cursor-pointer hover:bg-accent transition"
+        className="bg-card border border-border rounded-lg shadow-sm p-4 flex flex-col gap-3 
+        cursor-pointer hover:bg-accent transition"
       >
-        <h4 className="text-foreground font-semibold">{visit.visitDate}</h4>
+        <h4 className="text-foreground font-semibold">
+          {visit.createdAt.toLocaleDateString()}
+        </h4>
         {visit.diagnosis && (
           <p className="text-sm text-muted-foreground">
-            Diagnosis: {visit.diagnosis}
+            Diagnosis: {visit.diagnosis ||"__"}
           </p>
         )}
       </div>
 
-      <VisitDetailsSheet
+      {/* <VisitDetailsSheet
         visit={visit}
         open={open}
         onOpenChange={setOpen}
-      />
+      /> */}
     </>
-  )
+  );
 }
 
 export default memo(VisitCard);

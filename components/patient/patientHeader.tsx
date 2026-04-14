@@ -1,17 +1,16 @@
-"use client"
+"use client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 
 type PatientHeaderProps = {
   patient: {
     id: string;
-    name: string;
+    name: string | undefined;
     phone?: string;
-    gender?: string;
-    age?: number;
+    gender?: string | null;
+    age?: Date | null;
     avatar?: string;
-    lastVisit?: string;
-    nextAppointment?: string;
+    lastVisit?: Date | undefined;
   };
 };
 
@@ -23,7 +22,7 @@ export function PatientHeader({ patient }: PatientHeaderProps) {
         <Avatar className="h-14 w-14">
           <AvatarImage src={patient.avatar} />
           <AvatarFallback>
-            {patient.name.slice(0, 2).toUpperCase()}
+            {patient.name ? patient.name.slice(0, 2).toUpperCase() : ""}
           </AvatarFallback>
         </Avatar>
 
@@ -33,7 +32,17 @@ export function PatientHeader({ patient }: PatientHeaderProps) {
           </h2>
 
           <p className="text-sm text-muted-foreground">
-            {patient.gender} • {patient.age} years
+            {patient.gender ? patient.gender : "M/F"} •{" "}
+            {patient.age ? (
+              patient.age.toLocaleDateString()
+            ) : (
+              <span className="">
+                00-00-00{" "}
+                <span className="underline text-xs text-rose-400">
+                  eid your profile{" "}
+                </span>
+              </span>
+            )}
           </p>
 
           <p className="text-sm text-muted-foreground">📞 {patient.phone}</p>
@@ -44,23 +53,15 @@ export function PatientHeader({ patient }: PatientHeaderProps) {
       <div className="flex flex-col text-sm text-muted-foreground gap-1">
         <p>
           Last Visit:{" "}
-          <span className="text-foreground">{patient.lastVisit ?? "—"}</span>
-        </p>
-
-        <p>
-          Next Appointment:{" "}
           <span className="text-foreground">
-            {patient.nextAppointment ?? "—"}
+            {patient.lastVisit?.toLocaleDateString() ?? "—"}
           </span>
         </p>
       </div>
 
       {/* Actions */}
       <div className="flex gap-3">
-        <Button variant="secondary">Edit Patient</Button>
-
-        <Button>New Appointment</Button>
-
+        <Button variant="secondary">Edit</Button>
         <Button variant="outline">Start Visit</Button>
       </div>
     </div>
