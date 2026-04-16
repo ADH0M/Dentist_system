@@ -22,13 +22,13 @@ const layout = async ({ children }: { children: React.ReactNode }) => {
     redirect("/patient");
   }
 
-  if (role !== "admin") {
+  if (role !== "admin" && role != "assistant") {
     redirect("/");
   }
 
   return (
     <div className="flex min-h-screen ">
-      <Sidebar user={currentUser} />
+      {role === "admin" && <Sidebar user={currentUser} />}
       <div className="flex-1 overflow-x-hidden overflow-y-scroll">
         {children}
       </div>

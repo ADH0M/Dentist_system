@@ -2,6 +2,7 @@
 
 import { Visit } from "@/generated/prisma";
 import { memo, useState } from "react";
+import VisitDetailsSheet from "../visitDetailsSheet/VisitDetailsSheet";
 
 function VisitCard({ visit }: { visit: Visit }) {
   const [open, setOpen] = useState(false);
@@ -23,11 +24,11 @@ function VisitCard({ visit }: { visit: Visit }) {
         )}
       </div>
 
-      {/* <VisitDetailsSheet
+      <VisitDetailsSheet
         visit={visit}
         open={open}
         onOpenChange={setOpen}
-      /> */}
+      />
     </>
   );
 }

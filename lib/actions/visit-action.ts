@@ -118,6 +118,58 @@ export async function createPatientVisit(
   }
 }
 
+export async function prevCreateVisit(
+  { id }: { id: string |undefined},
+  prevState: VisitFormState,
+  formData: FormData,
+): Promise<VisitFormState> {
+  try {
+    const type = formData.get("type") as VisitType;
+
+    const isType = [
+      "Initial",
+      "FollowUp",
+      "Emergency",
+      "Cleaning",
+      "Consultation",
+      "Surgery",
+    ];
+
+    if (!isType.includes(type))
+      return { success: false, error: "type is not define " };
+
+    if (!id) return { success: false, error: "patient not define " };
+
+    let IdExist = true;
+    await prisma.$transaction(async (x) => {
+      const patient = await x.user.findUnique({
+        where: {
+          patientId: id,
+        },
+      });
+
+      if (patient) {
+        await x.visit.create({
+          data: { patientId: id, type, createdById: patient?.id },
+        });
+      } else {
+        IdExist = false;
+      }
+    });
+
+    if (!IdExist) return { success: false, error: "patient not define " };
+
+    
+    revalidatePath("/patients");
+    revalidatePath("/assistant");
+
+    return { success: true };
+  } catch (error) {
+    console.error("Database Error:", error);
+    return { success: false, error: "can not create visit " + error };
+  }
+}
+
 export async function getTodayVisits(): Promise<{
   success: boolean;
   data?: Visit[];
