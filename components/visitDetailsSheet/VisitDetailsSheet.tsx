@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { memo, useState } from "react";
@@ -8,31 +9,23 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 
-import ToothChart  from "@/components/tooth-chart/ToothChart";
-
-type Visit = {
-  id: string;
-  visitDate: string;
-  chiefComplaint?: string;
-  diagnosis?: string;
-  treatmentPlan?: string;
-  proceduresDone?: string;
-  doctor?: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  toothChart?: Record<string, any>;
-};
+import ToothChart from "@/components/tooth-chart/ToothChart";
+import { Visit } from "@/generated/prisma";
 
 type Props = {
-  visit: Visit | null;
+  visit: Visit;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
 
 function VisitDetailsSheet({ visit, open, onOpenChange }: Props) {
-  const [chart, setChart] = useState(visit?.toothChart || {});
+  const [chart, setChart] = useState<Record<string, any>>(
+    typeof visit?.toothChart === "object" && visit.toothChart !== null
+      ? (visit.toothChart as Record<string, any>)
+      : {},
+  );
 
   const handleSaveChart = () => {
-    // هنا سترسل البيانات إلى backend / Prisma
     console.log("Saving Tooth Chart:", chart);
   };
 
@@ -42,7 +35,9 @@ function VisitDetailsSheet({ visit, open, onOpenChange }: Props) {
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>Visit - {visit.visitDate}</SheetTitle>
+          <SheetTitle>
+            Visit - {visit.visitDate.toLocaleDateString()}
+          </SheetTitle>
         </SheetHeader>
 
         <div className="space-y-2  p-2">
@@ -51,9 +46,7 @@ function VisitDetailsSheet({ visit, open, onOpenChange }: Props) {
             <h3 className="text-sm font-semibold text-foreground">
               Visit Information
             </h3>
-            <p className="text-sm text-muted-foreground">
-              Doctor: {visit.doctor ?? "—"}
-            </p>
+            <p className="text-sm text-muted-foreground">Doctor: {"Dr:Taha"}</p>
             <p className="text-sm text-muted-foreground">
               Chief Complaint: {visit.chiefComplaint ?? "—"}
             </p>
