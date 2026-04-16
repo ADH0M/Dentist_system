@@ -5,6 +5,7 @@ import StoreProvider from "@/store/store";
 import { ThemeProvider } from "next-themes";
 import Navbar from "@/components/ui/Navbar";
 import { cookies } from "next/headers";
+import { Footer } from "@/components/CopyrightFooter";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -50,6 +51,7 @@ export default async function RootLayout({
             <Navbar user={user} />
             <main className="h-[calc(100vh-66px)] overflow-y-auto">
               {children}
+              <Footer />
             </main>
           </ThemeProvider>
         </body>
