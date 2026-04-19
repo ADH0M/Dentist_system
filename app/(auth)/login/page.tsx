@@ -26,8 +26,8 @@ export default function Signup() {
       <div className="w-full flex justify-center items-center   ">
         <div className="bg-card w-full sm:w-3/4 md:w-1/2 lg:w-1/3 rounded-2xl shadow-xl  overflow-hidden ">
           <div className="bg-linear-to-r from-accent to-accent-foreground p-4 text-card-foreground text-center">
-            <h2 className="text-2xl font-bold">Create New Account</h2>
-            <p className="mt-2">Fill in the details to create a new account</p>
+            <h2 className="text-2xl font-bold">Login</h2>
+            <p className="mt-2">Enter your credentials to sign in</p>
           </div>
 
           {state.errors?.general && (
@@ -105,7 +105,7 @@ export default function Signup() {
                   <span className="mx-2 block">loading-createAcount</span>
                 </span>
               ) : (
-                "sing up"
+                "Sign In"
               )}
             </button>
 
