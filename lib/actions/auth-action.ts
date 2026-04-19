@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import prisma from "../db/db-connection";
 import bcrypt from "bcryptjs";
+import { signToken, type JwtPayload } from "../utils/jwt";
 
 export type SignupFormState = {
   message?: string;
@@ -181,21 +182,21 @@ export async function loginUpAction(
       return { errors: { general: "Invalid credentials" } };
     }
 
-    const expireDate = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7);
-    const userSession = JSON.stringify({
+    const tokenPayload: Omit<JwtPayload, "iat" | "exp"> = {
       userId: user.id,
       username: user.username,
       email: user.email,
-      phone: user.phone,
+      phone: user.phone || undefined,
       role: user.role,
-      expireSesion: expireDate.toISOString(),
-    });
+      patientId: user.patientId || undefined,
+    };
 
-    const sessionToken = Buffer.from(userSession).toString("base64");
-    cookieStore.set("session", sessionToken, {
+    const token = signToken(tokenPayload);
+
+    cookieStore.set("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      expires: expireDate,
+      expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
       sameSite: "strict",
       path: "/",
     });
@@ -227,7 +228,7 @@ export async function logoutAction() {
         data: { isActive: false },
       });
     }
-    cookieStore.delete("session");
+    cookieStore.delete("token");
     cookieStore.delete("userId");
     cookieStore.delete("email");
     cookieStore.delete("username");

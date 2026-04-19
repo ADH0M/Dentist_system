@@ -66,8 +66,8 @@ export default function Signup() {
 
             {/* Phone */}
             <div className="md:w-[90%] w-full">
-              <label htmlFor="email" className="auth-label ">
-                Email Address
+              <label htmlFor="phone" className="auth-label ">
+                Phone Number
               </label>
               <input
                 type="tel"
