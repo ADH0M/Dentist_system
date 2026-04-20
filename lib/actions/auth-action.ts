@@ -114,7 +114,7 @@ export async function registerAction(
           name: username,
           phone,
         },
-      });      
+      });
       await t.user.create({
         data: {
           email,
@@ -122,7 +122,7 @@ export async function registerAction(
           password: hashedPassword,
           role: "patient",
           patientId: patient.id,
-          phone
+          phone,
         },
       });
     });
@@ -191,7 +191,7 @@ export async function loginUpAction(
       patientId: user.patientId || undefined,
     };
 
-    const token = signToken(tokenPayload);
+    const token =await signToken(tokenPayload);
 
     cookieStore.set("token", token, {
       httpOnly: true,

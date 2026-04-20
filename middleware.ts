@@ -2,16 +2,15 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { verifyToken } from "./lib/utils/jwt";
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const token =
     request.cookies.get("token")?.value ||
-    request.headers.get("authorization")?.replace("Bearer ", "");
-
+    request.headers.get("authorization")?.replace("Bearer ", "");   
   if (!token) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  const user = verifyToken(token);
+  const user =await verifyToken(token);
   if (!user) {
     return NextResponse.redirect(new URL("/login", request.url));
   }

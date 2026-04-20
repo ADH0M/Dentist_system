@@ -10,13 +10,11 @@ export default async function Page({
 }) {
   const { id } = await params;
 
-  const patientId = "123";
-
-  const patientL = await getPatient("69db9d9e88177c379a5914c8");
+  const patientL = await getPatient(id);
   const totalVisits = patientL.data?.visits.length
     ? patientL.data?.visits.length
     : 0;
-  const totalPaid = patientL.data?.invoices.length ? 123 : 0;
+  const totalPaid = patientL.data?.invoices.reduce((sum, inv) => sum + (inv.totalAmount || 0), 0) || 0;
   const stats = {
     totalVisits,
     totalPaid,
