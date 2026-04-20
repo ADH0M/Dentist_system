@@ -94,6 +94,16 @@ export default function Navbar({ user }: { user?: User }) {
               </Link>
             )}
 
+            {user?.role === "patient" && (
+              <Link
+                href={`/patient/${user.id}`}
+                className={`font-normal text-sm ${
+                  pathname === "/patient" ? "border border-primary  " : ""
+                } rounded-md px-2 p-1 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground`}
+              >
+                profile
+              </Link>
+            )}
             {/* Dark Mode Toggle */}
             <select
               name="select-item"
@@ -214,6 +224,28 @@ export default function Navbar({ user }: { user?: User }) {
                 onClick={toggleMenu}
               >
                 Dashboard
+              </Link>
+            )}
+
+            {user?.role === "assistant" && (
+              <Link
+                href="/assistant"
+                className={`font-normal text-sm ${
+                  pathname === "/assistant" ? "border border-primary  " : ""
+                } rounded-md px-2 p-1 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground`}
+              >
+                Assistant
+              </Link>
+            )}
+
+            {user?.role === "patient" && (
+              <Link
+                href={`/patient/${user.id}`}
+                className={`font-normal text-sm ${
+                  pathname === "/patient" ? "border border-primary  " : ""
+                } rounded-md px-2 p-1 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground`}
+              >
+                profile
               </Link>
             )}
 

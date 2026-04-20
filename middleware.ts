@@ -24,7 +24,7 @@ export async function middleware(request: NextRequest) {
   }
 
   if (pathname.startsWith("/assistant")) {
-    if (!["admin", "dentist", "assistant"].includes(user.role)) {
+    if (!["admin", "dentist", "assistant" ,'patient'].includes(user.role)) {
       return NextResponse.redirect(new URL("/", request.url));
     }
   }
@@ -35,15 +35,15 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  if (pathname.startsWith("/patient") || pathname.startsWith("/user")) {
-    if (user.role === "patient") {
-      if (!pathname.includes(`/${user.userId}/`) && !pathname.includes(`/${user.patientId}/`)) {
-        return NextResponse.redirect(new URL(`/patient/${user.patientId}`, request.url));
-      }
-    } else if (!["admin", "dentist", "assistant", "receptionist"].includes(user.role)) {
-      return NextResponse.redirect(new URL("/", request.url));
-    }
-  }
+  // if (pathname.startsWith("/patient") || pathname.startsWith("/user")) {
+  //   if (user.role === "patient") {
+  //     if (!pathname.includes(`/${user.userId}/`) && !pathname.includes(`/${user.patientId}/`)) {
+  //       return NextResponse.redirect(new URL(`/patient/${user.patientId}`, request.url));
+  //     }
+  //   } else if (!["admin", "dentist", "assistant", "receptionist"].includes(user.role)) {
+  //     return NextResponse.redirect(new URL("/", request.url));
+  //   }
+  // }
 
   return NextResponse.next();
 }

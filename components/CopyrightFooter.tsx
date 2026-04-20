@@ -1,3 +1,4 @@
+"use client";
 import Link from "next/link";
 import {
   Facebook,
@@ -7,11 +8,16 @@ import {
   Mail,
   MapPin,
 } from "lucide-react";
+import { usePathname } from "next/navigation";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
+  const pahtname = usePathname();
+  console.log(pahtname);
 
-  return (
+  return pahtname != "/" && pahtname !== "/about" ? (
+    <div />
+  ) : (
     <footer className="bg-muted/30 border-t border-border mt-6">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Top Grid: Brand, Links, Contact, Social */}

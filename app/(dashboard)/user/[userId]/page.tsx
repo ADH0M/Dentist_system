@@ -1,6 +1,7 @@
 import CreateVisit from "@/components/visit/CreateVisit";
 import { getPatient } from "@/lib/actions/patientActions";
 import { redirect } from "next/navigation";
+import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog";
 
 const UserDashboard = async ({
   params,
