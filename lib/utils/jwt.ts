@@ -8,7 +8,7 @@ const secret = new TextEncoder().encode(JWT_SECRET)
 export interface JwtPayload {
   userId: string
   username: string
-  email: string
+  email?: string
   phone?: string
   role: string
   patientId?: string

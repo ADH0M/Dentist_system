@@ -17,36 +17,36 @@ const ProfilePage = () => {
           <Tabs.Trigger
             value="overview"
             className="flex-1 px-6 py-2.5 rounded-lg text-sm font-medium transition-all 
-      data-[state=active]:bg-primary data-[state=active]:text-primary-foreground 
-      data-[state=inactive]:text-muted-foreground 
-      data-[state=inactive]:hover:bg-accent data-[state=inactive]:hover:text-accent-foreground"
+            data-[state=active]:bg-primary data-[state=active]:text-primary-foreground 
+            data-[state=inactive]:text-muted-foreground 
+            data-[state=inactive]:hover:bg-accent data-[state=inactive]:hover:text-accent-foreground"
           >
             Overview
           </Tabs.Trigger>
           <Tabs.Trigger
             value="visits"
             className="flex-1 px-6 py-2.5 rounded-lg text-sm font-medium transition-all 
-      data-[state=active]:bg-primary data-[state=active]:text-primary-foreground 
-      data-[state=inactive]:text-muted-foreground 
-      data-[state=inactive]:hover:bg-accent data-[state=inactive]:hover:text-accent-foreground"
+            data-[state=active]:bg-primary data-[state=active]:text-primary-foreground 
+            data-[state=inactive]:text-muted-foreground 
+            data-[state=inactive]:hover:bg-accent data-[state=inactive]:hover:text-accent-foreground"
           >
             Visits
           </Tabs.Trigger>
           <Tabs.Trigger
             value="billing"
             className="flex-1 px-6 py-2.5 rounded-lg text-sm font-medium transition-all 
-      data-[state=active]:bg-primary data-[state=active]:text-primary-foreground 
-      data-[state=inactive]:text-muted-foreground 
-      data-[state=inactive]:hover:bg-accent data-[state=inactive]:hover:text-accent-foreground"
+            data-[state=active]:bg-primary data-[state=active]:text-primary-foreground 
+            data-[state=inactive]:text-muted-foreground 
+            data-[state=inactive]:hover:bg-accent data-[state=inactive]:hover:text-accent-foreground"
           >
             Billing
           </Tabs.Trigger>
           <Tabs.Trigger
             value="images"
             className="flex-1 px-6 py-2.5 rounded-lg text-sm font-medium transition-all 
-      data-[state=active]:bg-primary data-[state=active]:text-primary-foreground 
-      data-[state=inactive]:text-muted-foreground 
-      data-[state=inactive]:hover:bg-accent data-[state=inactive]:hover:text-accent-foreground"
+            data-[state=active]:bg-primary data-[state=active]:text-primary-foreground 
+            data-[state=inactive]:text-muted-foreground 
+            data-[state=inactive]:hover:bg-accent data-[state=inactive]:hover:text-accent-foreground"
           >
             Images
           </Tabs.Trigger>

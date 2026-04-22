@@ -1,6 +1,14 @@
 import { Search, Bell } from "lucide-react";
 
-export default function PatientTopbar() {
+export default function PatientTopbar({
+  username,
+  type,
+  id
+}: {
+  username: string | undefined;
+  type: string | undefined;
+  id?:string |undefined
+}) {
   return (
     <header className="h-16 bg-background border-b border-sidebar-border flex items-center justify-between px-6">
       <div className="flex items-center gap-4 flex-1 max-w-xl">
@@ -22,8 +30,8 @@ export default function PatientTopbar() {
 
         <div className="flex items-center gap-3">
           <div className="text-right">
-            <div className="font-medium">john Wilson</div>
-            <div className="text-sm text-muted-foreground">Administrator</div>
+            <div className="font-medium">{username || "__"}</div>
+            <div className="text-sm text-muted-foreground">{type || "__"}</div>
           </div>
         </div>
       </div>

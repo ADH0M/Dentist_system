@@ -6,6 +6,7 @@ import { ThemeProvider } from "next-themes";
 import Navbar from "@/components/ui/Navbar";
 import { cookies } from "next/headers";
 import { Footer } from "@/components/CopyrightFooter";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -47,6 +48,7 @@ export default async function RootLayout({
             defaultTheme="system"
             disableTransitionOnChange
           >
+            <Toaster />
             {/* <Sidebar /> */}
             <Navbar user={user} />
             <main className="h-[calc(100vh-66px)] overflow-y-auto">
