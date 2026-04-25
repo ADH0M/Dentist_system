@@ -60,3 +60,8 @@ export const loginSchema = z.object({
     .min(8, "Password must be at least 8 characters")
     .max(100),
 });
+
+export const updateUserInfo = z.object({
+  name: z.string().min(3, "your name too short").max(100, "your name too long"),
+  phone:z.string
+});

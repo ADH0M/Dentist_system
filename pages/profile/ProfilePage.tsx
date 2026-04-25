@@ -1,6 +1,6 @@
 "use client";
 import * as Tabs from "@radix-ui/react-tabs";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { OverviewTab } from "./tabs/OverviewTab";
 import { VisitsTab } from "./tabs/VisitsTab";
 import { BillingTab } from "./tabs/BillingTab";
@@ -8,6 +8,12 @@ import { ImagesTab } from "./tabs/ImageTab";
 
 const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState("overview");
+
+  useEffect(() => {
+    if ("connection" in navigator) {
+      console.log("true",',,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,');
+    }
+  });
 
   return (
     <>

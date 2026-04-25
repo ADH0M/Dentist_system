@@ -5,7 +5,6 @@ import StoreProvider from "@/store/store";
 import { ThemeProvider } from "next-themes";
 import Navbar from "@/components/ui/Navbar";
 import { cookies } from "next/headers";
-import { Footer } from "@/components/CopyrightFooter";
 import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
@@ -51,9 +50,9 @@ export default async function RootLayout({
             <Toaster />
             {/* <Sidebar /> */}
             <Navbar user={user} />
-            <main className="h-[calc(100vh-66px)] overflow-y-auto">
+            <main className="h-[calc(100vh-66px)] overflow-hidden">
+              
               {children}
-              <Footer />
             </main>
           </ThemeProvider>
         </body>

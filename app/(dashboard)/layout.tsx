@@ -27,7 +27,7 @@ const layout = async ({ children }: { children: React.ReactNode }) => {
   }
 
   return (
-    <div className="flex min-h-screen ">
+    <div className="flex h-full overflow-hidden ">
        <Sidebar user={currentUser} />
       <div className="flex-1 overflow-x-hidden overflow-y-scroll">
         {children}

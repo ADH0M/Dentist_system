@@ -20,8 +20,8 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import  AddAssistant  from "@/pages/assistant/AddAssistant";
-
+import AddAssistant from "@/pages/assistant/AddAssistant";
+import { logoutAction } from "@/lib/actions/auth-action";
 
 type User = {
   id: string;
@@ -45,6 +45,7 @@ function SidebarContent({
     { name: "Dashboard", href: "/admin", icon: "📊" },
     { name: "Patient", href: "/admin/users", icon: "👥" }, // Fixed typo: Patiant → Patient
   ];
+
   const handleLinkClick = () => {
     // Close mobile sheet when a link is clicked
     if (onClose) onClose();
@@ -58,7 +59,7 @@ function SidebarContent({
           <div className="bg-primary w-10 h-10 rounded-lg text-secondary flex items-center justify-center font-bold text-xl">
             T
           </div>
-          <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70">
+          <span className="text-xl font-bold bg-clip-text text-transparent bg-linear-to-r from-primary to-primary/70">
             TaskFlow
           </span>
         </div>
@@ -82,46 +83,50 @@ function SidebarContent({
         </div>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 px-4 py-6 overflow-y-auto">
-        <div className="mb-6">
-          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-4">
-            Admin
-          </h3>
-          <ul className="space-y-2">
-            {navItems.map((item) => (
-              <li key={item.href + " " + item.name}>
-                <Link
-                  href={item.href}
-                  onClick={handleLinkClick}
-                  className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
-                    pathname === item.href
-                      ? "bg-primary text-primary-foreground shadow-md"
-                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                  }`}
-                >
-                  <span className="text-lg">{item.icon}</span>
-                  <span className="font-medium">{item.name}</span>
-                </Link>
+      {/* Admin Navigation */}
+      {user?.role === "admin" && (
+        <nav className="flex-1 px-4 py-6 overflow-y-auto">
+          <div className="mb-6">
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-4">
+              Admin
+            </h3>
+            <ul className="space-y-2">
+              {navItems.map((item) => (
+                <li key={item.href + " " + item.name}>
+                  <Link
+                    href={item.href}
+                    onClick={handleLinkClick}
+                    className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                      pathname === item.href
+                        ? "bg-primary text-primary-foreground shadow-md"
+                        : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                    }`}
+                  >
+                    <span className="text-lg">{item.icon}</span>
+                    <span className="font-medium">{item.name}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <Separator className="my-4" />
+
+          <div>
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-4">
+              App
+            </h3>
+            <ul className="space-y-2">
+              <li>
+                <AddAssistant />
               </li>
-            ))}
-          </ul>
-        </div>
+            </ul>
+          </div>
+        </nav>
+      )}
 
-        <Separator className="my-4" />
-
-        <div>
-          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-4">
-            App
-          </h3>
-          <ul className="space-y-2">
-            <li>
-              <AddAssistant />
-            </li>
-          </ul>
-        </div>
-      </nav>
-
+      {/* "User Navigation" */}
+      <nav className="flex-1 px-4 py-6 overflow-y-auto"></nav>
       {/* Footer */}
       <div className="p-4 border-t border-border">
         <div className="flex items-center justify-between text-sm text-muted-foreground">
@@ -130,7 +135,14 @@ function SidebarContent({
             <Button variant="ghost" size="icon" className="h-8 w-8">
               <Settings className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 hover:text-destructive cursor-pointer"
+              onClick={async () => {
+                await logoutAction();
+              }}
+            >
               <LogOut className="h-4 w-4" />
             </Button>
           </div>
@@ -146,8 +158,10 @@ export default function Sidebar({ user }: { user?: User }) {
   return (
     <>
       {/* Mobile: Hamburger Menu (visible only on small screens) */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-50 flex items-center justify-between p-4 
-      bg-sidebar border-b border-border">
+      <div
+        className="md:hidden fixed top-0 left-0 right-0 z-50 flex items-center justify-between p-4 
+      bg-sidebar border-b border-border"
+      >
         <Sheet>
           <SheetTrigger asChild>
             <Button variant="ghost" size="icon" className="text-foreground">
@@ -173,8 +187,10 @@ export default function Sidebar({ user }: { user?: User }) {
       </div>
 
       {/* Desktop: Persistent Sidebar (hidden on mobile) */}
-      <aside className="hidden md:flex w-64 bg-sidebar border-r border-border text-foreground flex-col 
-      sticky top-0 h-screen">
+      <aside
+        className="hidden md:flex w-64 bg-sidebar border-r border-border text-foreground flex-col 
+      sticky top-0 h-full"
+      >
         <SidebarContent user={safeUser} />
       </aside>
 

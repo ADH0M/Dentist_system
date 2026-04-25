@@ -3,6 +3,7 @@ import { PatientQuickStats } from "@/components/patient/PatientQuickStats";
 import { PatientTabs } from "@/components/patient/PatientTabs";
 import PatientTopbar from "@/components/patient/Topbar";
 import { getPatient } from "@/lib/actions/patientActions";
+import Online from "@/pages/profile/UserStatus";
 import ProfilePage from "@/pages/profile/ProfilePage";
 
 export default async function Page({
@@ -10,11 +11,11 @@ export default async function Page({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  // const { id } = await params;
+  const { id } = await params;
 
   // const patientL = await getPatient(id);
   // console.log(patientL);
-  
+
   // const totalVisits = patientL.data?.visits.length
   //   ? patientL.data?.visits.length
   //   : 0;
@@ -30,11 +31,10 @@ export default async function Page({
 
   // console.log(patientL.data);
 
-
-
   return (
     <div className="  space-y-4 p-4">
-      <PatientTopbar username={'user.name'} type={"patient"} id={'user.id'} />
+      <Online userId={id} />
+      <PatientTopbar username={"user.name"} type={"patient"} id={"user.id"} />
       {/* <PatientQuickStats stats={stats} /> */}
       {/* <PatientHeader patient={patient} />
       <PatientTabs patient={patientL.data} /> */}
