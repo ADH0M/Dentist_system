@@ -93,16 +93,37 @@ export default function Navbar({ user }: { user?: User }) {
                 Assistant
               </Link>
             )}
-
-            {user?.role === "patient" && (
+            
+            {user?.role === "receptionist" && (
               <Link
-                href={`/patient/${user.id}`}
+                href={`/receptionist/${user.id}`}
                 className={`font-normal text-sm ${
-                  pathname === "/patient" ? "border border-primary  " : ""
+                  pathname === "/receptionist" ? "border border-primary  " : ""
                 } rounded-md px-2 p-1 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground`}
               >
-                profile
+                Dashboard
               </Link>
+            )}
+
+            {user?.role ? (
+              [
+                "admin",
+                "patient",
+                "assistant",
+                "dentist",
+                "receptionist",
+              ].includes(user?.role) && (
+                <Link
+                  href={`/patient/${user.id}`}
+                  className={`font-normal text-sm ${
+                    pathname === "/patient" ? "border border-primary  " : ""
+                  } rounded-md px-2 p-1 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground`}
+                >
+                  Profile
+                </Link>
+              )
+            ) : (
+              <span />
             )}
             {/* Dark Mode Toggle */}
             <select

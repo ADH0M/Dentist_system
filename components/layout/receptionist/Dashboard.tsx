@@ -1,49 +1,20 @@
 "use client";
-import { useState } from "react";
-
-import { Button } from "@/components/ui/button";
 import { PatientList } from "./PatientList";
 import { AddPatientDialog } from "./AddPatientDialog";
 import { AddAppointmentDialog } from "./AddAppoitmentDailog";
-import { PatientWithVisits } from "@/lib/actions/patientActions";
-
-
+import { useSelectorHook } from "@/hooks/useSelector";
+import { PatientWithUser } from "@/type/types";
 
 export default function ReceptionistDashboard({
   patients,
 }: {
-  patients: PatientWithVisits[] | undefined;
+  patients: PatientWithUser[] | undefined;
 }) {
-  const [selectedTab, setSelectedTab] = useState<
-    "patients" | "appointments" | "visits"
-  >("patients");
+  const selectedTab = useSelectorHook((state) => state.receptionistReducer);
 
   return (
     <div className="flex h-screen bg-background text-foreground">
       {/* Sidebar */}
-      <aside className="w-64 bg-sidebar text-sidebar-foreground border-r border-sidebar-border p-4 flex flex-col gap-4">
-        <h2 className="text-xl font-bold mb-4">Receptionist</h2>
-        <nav className="flex flex-col gap-2">
-          <Button
-            variant={selectedTab === "patients" ? "default" : "ghost"}
-            onClick={() => setSelectedTab("patients")}
-          >
-            Patients
-          </Button>
-          <Button
-            variant={selectedTab === "appointments" ? "default" : "ghost"}
-            onClick={() => setSelectedTab("appointments")}
-          >
-            Appointments
-          </Button>
-          <Button
-            variant={selectedTab === "visits" ? "default" : "ghost"}
-            onClick={() => setSelectedTab("visits")}
-          >
-            Visits
-          </Button>
-        </nav>
-      </aside>
 
       {/* Main Content */}
       <main className="flex-1 p-6 overflow-y-auto">
@@ -61,27 +32,27 @@ export default function ReceptionistDashboard({
         </header>
 
         {/* Content based on tab */}
-        {selectedTab === "patients" && patients && (
-          <PatientList patients={patients} componentType="patient"/>
+        {selectedTab.type === "patients" && patients && (
+          <PatientList patients={patients} componentType="patient" />
         )}
 
-        {selectedTab === "appointments" && (
+        {selectedTab.type === "appointments" && (
           <div className="text-sm text-muted-foreground">
             {/* Placeholder for Appointment Calendar / List */}
             Appointment Calendar / List will appear here
           </div>
         )}
 
-        {selectedTab === "visits" && patients && (
+        {selectedTab.type === "visits" && patients && (
           <div className="text-sm text-muted-foreground">
             {/* Placeholder for Visits Table / List */}
-            <PatientList patients={patients.filter((p)=>p.visits.length)} componentType="visit"/>
+            {/* <PatientList
+              componentType="visit"
+            /> */}
           </div>
         )}
       </main>
     </div>
   );
 }
-// invoce 
-// doctor dashboard  
-// patient page 
+

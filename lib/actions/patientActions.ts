@@ -1,61 +1,75 @@
 "use server";
 
-import { Patient, Prisma } from "@/generated/prisma";
+import { Gender, Patient } from "@/generated/prisma";
 import prisma from "../db/db-connection";
 import { revalidatePath } from "next/cache";
-
-export type PatientFormState = {
-  success: boolean;
-  error?: string;
-};
-
-export type GetPatientType = {
-  success: boolean;
-  data?: P_VisitsInvoicesImages;
-  msg?: string;
-  error?: boolean;
-  redirect?: boolean;
-};
-
-export type P_VisitsInvoicesImages = Prisma.PatientGetPayload<{
-  include: { visits: true; images: true; invoices: true };
-}>;
+import { NewPatientValid } from "../validations/schema";
+import { isExistPhone } from "./auth-action";
+import bcrypt from "bcryptjs";
+import { generatePassword, getDateRange } from "../utils";
+import {
+  GetPatientType,
+  PatientError,
+  PatientFormState,
+  PatientWithUser,
+  PatientWithVisits,
+} from "@/type/types";
 
 export async function createPatient(
+  createBy: string,
   prevState: PatientFormState,
   formData: FormData,
 ): Promise<PatientFormState> {
   try {
-    const name = formData.get("name") as string;
+    const username = formData.get("name") as string;
     const phone = formData.get("phone") as string;
     const address = formData.get("address") as string | null;
     const birthdate = formData.get("date") as string;
+    const gender = (formData.get("gender") as Gender)?.toLowerCase();
+    const parseDate = new Date(birthdate);
+    const errors: PatientError = {};
+    const patientData = {
+      username,
+      phone,
+      address: address ? address.trim() : undefined,
+      birthdate:
+        parseDate && !isNaN(parseDate.getTime()) ? parseDate : undefined,
+      gender,
+    };
 
-    const gender = (formData.get("gender") as string)?.toLowerCase();
-
-    if (!name || !name.trim() || name.length < 3) {
-      return { success: false, error: "اسم المريض مطلوب (3 أحرف على الأقل)" };
+    if (!createBy) return { success: false, error: "redirect" };
+    const validation = NewPatientValid.safeParse(patientData);
+    if (!validation.success) {
+      validation.error.issues.forEach((er) => {
+        const message = er.message;
+        const path = er.path[0] as keyof PatientError;
+        errors[path] = message;
+      });
+      return { success: false, errors };
     }
 
-    const phoneRegex = /^[0-9]+$/;
-    if (!phone || !phoneRegex.test(phone) || phone.length !== 11) {
-      return { success: false, error: "رقم الهاتف يجب أن يكون 11 رقماً" };
+    const phoneIsExist = await isExistPhone(validation.data.phone);
+    if (phoneIsExist) {
+      return { success: false, error: "user phone exists" };
     }
 
-    if (gender !== "female" && gender !== "male") {
-      return { success: false, error: "الجنس يجب أن يكون male أو female" };
-    }
-
-    const birthDateValue = birthdate ? new Date(birthdate) : null;
-
-    await prisma.patient.create({
-      data: {
-        phone,
-        name: name.trim(),
-        address: address?.trim() || null,
-        gender: gender as "male" | "female",
-        birthDate: birthDateValue,
-      },
+    const password = generatePassword();
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await prisma.$transaction(async (t) => {
+      const user = await t.user.create({
+        data: {
+          username,
+          phone,
+          password: hashedPassword,
+          gender: validation.data.gender,
+        },
+      });
+      await t.patient.create({
+        data: {
+          createdById: createBy,
+          userId: user.id,
+        },
+      });
     });
 
     revalidatePath("/patients");
@@ -63,7 +77,7 @@ export async function createPatient(
     return { success: true };
   } catch (error) {
     console.error("Database Error:", error);
-    return { success: false, error: "فشل إنشاء المريض، حاول مرة أخرى" };
+    return { success: false, error: "can't to create patient right now" };
   }
 }
 
@@ -104,18 +118,6 @@ export async function getPatient(id: string): Promise<GetPatientType> {
   }
 }
 
-function getDateRange(daysAgo: number) {
-  const now = new Date();
-
-  const targetDate = new Date(now);
-  targetDate.setDate(now.getDate() - daysAgo);
-
-  const startOfDay = new Date(targetDate.setHours(0, 0, 0, 0));
-  const endOfDay = new Date(targetDate.setHours(23, 59, 59, 999));
-
-  return { startOfDay, endOfDay };
-}
-
 export async function getLastDayPatients(): Promise<{
   success: boolean;
   data?: Patient[];
@@ -154,13 +156,9 @@ export async function getLastDayPatients(): Promise<{
   }
 }
 
-export type PatientWithVisits = Prisma.PatientGetPayload<{
-  include: { visits: true };
-}>;
-
 export async function getTodayPatients(): Promise<{
   success: boolean;
-  data?: PatientWithVisits[];
+  data?: PatientWithUser[];
   error?: string;
   count?: number;
 }> {
@@ -180,9 +178,12 @@ export async function getTodayPatients(): Promise<{
         createdAt: "asc",
       },
       include: {
-        visits: true,
+        user: true,
       },
     });
+
+    console.log(patients, "form server llllllllllllllllllllllll");
+
     return {
       success: true,
       data: patients,
@@ -209,21 +210,7 @@ export async function deletePatient({
   }
 
   try {
-    await prisma.$transaction(async (x) => {
-      const del = await x.user.findUnique({
-        where: { patientId: id },
-      });
-
-      if (del) {
-        await x.user.delete({
-          where: { patientId: id },
-        });
-      }
-
-      await x.patient.delete({
-        where: { id },
-      });
-    });
+    await prisma.$transaction(async (x) => {});
 
     revalidatePath("/patients");
     revalidatePath("/admin");

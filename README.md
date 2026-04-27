@@ -61,7 +61,7 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 | firstName      |
 | lastName       |
 | phone          |
-| email          |
+| email?         |---partial index  => {partialFilterExpression: {email: { $type: "string" }} ,unique ture}
 | birthDate      |
 | gender         |
 | address        |

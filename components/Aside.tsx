@@ -9,6 +9,10 @@ import {
   UserIcon,
   MailMinus,
   LucideUserRoundPen,
+  UserStar,
+  Users,
+  ClipboardClock,
+  Calendar,
 } from "lucide-react"; // Install: npm install lucide-react
 
 // shadcn/ui imports
@@ -22,6 +26,9 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import AddAssistant from "@/pages/assistant/AddAssistant";
 import { logoutAction } from "@/lib/actions/auth-action";
+import { useState } from "react";
+import { useDispatchHook, useSelectorHook } from "@/hooks/useSelector";
+import { changeReciptionsTab } from "@/store/reducers/receptionistReducer";
 
 type User = {
   id: string;
@@ -41,11 +48,22 @@ function SidebarContent({
 }) {
   const pathname = usePathname();
 
+  const selectedTab = useSelectorHook((state) => state.receptionistReducer);
+  const dispatch = useDispatchHook();
   const navItems = [
     { name: "Dashboard", href: "/admin", icon: "📊" },
     { name: "Patient", href: "/admin/users", icon: "👥" }, // Fixed typo: Patiant → Patient
   ];
 
+  const receptionItems = [
+    { name: "Patients", type: "patients", icon: <Users size={16} /> }, // Fixed typo: Patiant → Patient
+    {
+      name: "Appointments",
+      type: "appointments",
+      icon: <ClipboardClock size={16} />,
+    },
+    { name: "Visits", type: "visits", icon: <Calendar size={16} /> },
+  ];
   const handleLinkClick = () => {
     // Close mobile sheet when a link is clicked
     if (onClose) onClose();
@@ -125,8 +143,35 @@ function SidebarContent({
         </nav>
       )}
 
+      {/* Receptionist Navigation */}
+      {user?.role === "receptionist" && (
+        <nav className="flex-1 py-6 overflow-y-auto">
+          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4 px-4 flex gap-2 ">
+            <UserStar size={16} className="text-primary" />
+            <span className="text-secondary-foreground">Receptionist</span>
+          </h3>
+          <div className="px-4  space-y-1.5 w-full">
+            {receptionItems.map((item) => {
+              return (
+                <Button
+                  key={item.name}
+                  variant={selectedTab.type === item.type ? "default" : "ghost"}
+                  onClick={() => dispatch(changeReciptionsTab(item.type))}
+                  className="w-full  relative cursor-pointer"
+                >
+                  <span className={`absolute left-2`}>{item.icon}</span>
+                  <span>{item.name}</span>
+                </Button>
+              );
+            })}
+          </div>
+          <Separator className="my-4" />
+        </nav>
+      )}
+
       {/* "User Navigation" */}
       <nav className="flex-1 px-4 py-6 overflow-y-auto"></nav>
+
       {/* Footer */}
       <div className="p-4 border-t border-border">
         <div className="flex items-center justify-between text-sm text-muted-foreground">

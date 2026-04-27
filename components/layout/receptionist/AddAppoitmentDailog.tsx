@@ -12,11 +12,11 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { PatientWithUser } from "@/type/types"
 
-type Patient = { id: string; name: string }
 
 type AddAppointmentDialogProps = {
-  patients: Patient[]
+  patients: PatientWithUser[] 
   onAdd: (appointment: { patientId: string; date: string; time: string }) => void
 }
 
@@ -53,7 +53,7 @@ export function AddAppointmentDialog({ patients, onAdd }: AddAppointmentDialogPr
               </SelectTrigger>
               <SelectContent>
                 {patients.map((p) => (
-                  <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                  <SelectItem key={p.id} value={p.id}>{p.user.username}</SelectItem>
                 ))}
               </SelectContent>
             </Select>

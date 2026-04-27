@@ -16,12 +16,13 @@ import { memo, useActionState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { redirect } from "next/navigation";
 import { useSelectorHook } from "@/hooks/useSelector";
-import { deletePatient, PatientWithVisits } from "@/lib/actions/patientActions";
+import { deletePatient } from "@/lib/actions/patientActions";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { PatientWithUser } from "@/type/types";
 
 type Props = {
-  patient: PatientWithVisits;
+  patient: PatientWithUser;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   componentType: "patient" | "appointment" | "visit";
@@ -47,21 +48,21 @@ function PatientDetailsSheet({
     error: "",
   };
   const assistant = useSelectorHook((state) => state.authReducer);
-  const createBy = assistant.data?.id;
+  const createBy = assistant?.data?.id;
 
   const [state, formAction, pending] = useActionState(
     createPatientVisit.bind(null, { id: patient.id, createBy }),
     intialState,
   );
 
-  const [update, updateFormAction, updatePending] = useActionState(
-    updateVisit.bind(null, {
-      visitId: patient.visits.length
-        ? patient.visits[patient.visits.length - 1].id
-        : "",
-    }),
-    intialState,
-  );
+  // const [update, updateFormAction, updatePending] = useActionState(
+  //   updateVisit.bind(null, {
+  //     visitId: patient.visits.length
+  //       ? patient.visits[patient.visits.length - 1].id
+  //       : "",
+  //   }),
+  //   intialState,
+  // );
 
   const [deleteState, deletePatientAction, deletePending] = useActionState(
     deletePatient.bind(null, { id: patient.id }),
@@ -101,20 +102,20 @@ function PatientDetailsSheet({
     }
   }, [deleteState.success, onOpenChange]);
 
-  useEffect(() => {
-    if (!update.success && update.error === "redirect") {
-      setTimeout(() => {
-        onOpenChange(false);
-        redirect("/");
-      }, 500);
-    }
-  }, [update.success, update.error, onOpenChange]);
+  // useEffect(() => {
+  //   if (!update.success && update.error === "redirect") {
+  //     setTimeout(() => {
+  //       onOpenChange(false);
+  //       redirect("/");
+  //     }, 500);
+  //   }
+  // }, [update.success, update.error, onOpenChange]);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
         <SheetHeader>
-          <SheetTitle className="text-2xl">{patient.name}</SheetTitle>
+          <SheetTitle className="text-2xl">{patient.user.username}</SheetTitle>
 
           {componentType === "patient" && (
             <form
@@ -132,17 +133,17 @@ function PatientDetailsSheet({
           <div className="bg-card border border-border rounded-lg p-4">
             <h3 className="font-semibold text-foreground">Patient Info</h3>
             <p className="text-sm text-muted-foreground">
-              Phone: {patient.phone ?? "—"}
+              Phone: {patient.user.phone ?? "—"}
             </p>
             <p className="text-sm text-muted-foreground">
-              gender: {patient.gender ?? "—"}
+              gender: {patient.user.gender ?? "—"}
             </p>
-            {componentType === "visit" && (
+            {/* {componentType === "visit" && (
               <p className="text-sm text-muted-foreground">
                 last visit :{" "}
-                {patient.visits[patient.visits.length - 1].type || ""}
+                {patient.user.}
               </p>
-            )}
+            )} */}
           </div>
 
           {componentType === "appointment" && (
@@ -162,12 +163,12 @@ function PatientDetailsSheet({
             <div className="bg-card border border-border rounded-lg p-4 space-y-2">
               <h3 className="font-semibold text-foreground">Visits</h3>
               {/* هنا نعرض Visits مختصر مع إمكانية فتح ToothChart */}
-              <p className="text-sm text-muted-foreground">
+              {/* <p className="text-sm text-muted-foreground">
                 total visit :{" "}
                 {patient.visits?.length
                   ? patient.visits?.length
                   : "No visits yet"}
-              </p>
+              </p> */}
 
               <form action={formAction}>
                 <Label>Visit Type</Label>
@@ -218,14 +219,14 @@ function PatientDetailsSheet({
           {componentType === "visit" && (
             <div className="bg-card border border-border rounded-lg p-4 space-y-2 relative w-full">
               <h3 className="font-semibold text-foreground">Visits</h3>
-              <p className="text-sm text-muted-foreground">
+              {/* <p className="text-sm text-muted-foreground">
                 total visit :{" "}
                 {patient.visits?.length
                   ? patient.visits?.length
                   : "No visits yet"}
-              </p>
+              </p> */}
 
-              <div className="border-border border-t border-b max-h-40 min-h-20 overflow-x-hidden overflow-y-scroll">
+              {/* <div className="border-border border-t border-b max-h-40 min-h-20 overflow-x-hidden overflow-y-scroll">
                 {patient.visits.length > 0 &&
                   patient.visits.toReversed().map((visit, ind) => (
                     <div
@@ -278,7 +279,7 @@ function PatientDetailsSheet({
                 >
                   {updatePending ? "Saving..." : "Update"}
                 </Button>
-              </form>
+              </form> */}
             </div>
           )}
         </div>

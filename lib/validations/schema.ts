@@ -31,7 +31,7 @@ export const usernameValid = z
 export const emailValid = z.email("invalid email fromat");
 export const phoneValid = z
   .string()
-  .regex(/^\+?[0-9]{10,15}$/, "Invalid phone number format");
+  .regex(/^01[0125][0-9]{8}$/, "Invalid phone number");
 
 export const registrationSchema = z
   .object({
@@ -63,5 +63,19 @@ export const loginSchema = z.object({
 
 export const updateUserInfo = z.object({
   name: z.string().min(3, "your name too short").max(100, "your name too long"),
-  phone:z.string
+  phone: z.string,
 });
+
+export const NewPatientValid = z.object({
+  username: z
+    .string()
+    .trim()
+    .min(3, "patient name too short")
+    .max(50, "patient name to long"),
+  phone: phoneValid,
+  address: z.string().trim().min(3).optional().or(z.literal("")),
+  gender: z.enum(["male", "female"]),
+  birthdate: z.date().optional().or(z.literal("invalid date")),
+});
+
+export type NewPatientType = z.infer<typeof NewPatientValid>;

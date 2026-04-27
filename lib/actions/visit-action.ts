@@ -1,7 +1,11 @@
 "use server";
-import { Visit, VisitType } from "@/generated/prisma";
+import { Prisma, Visit, VisitType } from "@/generated/prisma";
 import prisma from "../db/db-connection";
 import { revalidatePath } from "next/cache";
+
+export type PatientWithVisits = Prisma.PatientGetPayload<{
+  include: { visits: true; user: true };
+}>;
 
 export type VisitFormState = {
   success: boolean;
@@ -119,7 +123,7 @@ export async function createPatientVisit(
 }
 
 export async function prevCreateVisit(
-  { id }: { id: string |undefined},
+  { id }: { id: string | undefined },
   prevState: VisitFormState,
   formData: FormData,
 ): Promise<VisitFormState> {
@@ -142,15 +146,11 @@ export async function prevCreateVisit(
 
     let IdExist = true;
     await prisma.$transaction(async (x) => {
-      const patient = await x.user.findUnique({
-        where: {
-          patientId: id,
-        },
-      });
+      const patient = false;
 
       if (patient) {
         await x.visit.create({
-          data: { patientId: id, type, createdById: patient?.id },
+          data: { patientId: id, type, createdById: '8989898989898989' },
         });
       } else {
         IdExist = false;
@@ -159,7 +159,6 @@ export async function prevCreateVisit(
 
     if (!IdExist) return { success: false, error: "patient not define " };
 
-    
     revalidatePath("/patients");
     revalidatePath("/assistant");
 
@@ -170,9 +169,10 @@ export async function prevCreateVisit(
   }
 }
 
+
 export async function getTodayVisits(): Promise<{
   success: boolean;
-  data?: Visit[];
+  data?: PatientWithVisits[];
   error?: string;
   count?: number;
 }> {
@@ -181,20 +181,25 @@ export async function getTodayVisits(): Promise<{
     const startOfDay = new Date(now.setHours(0, 0, 0, 0));
     const endOfDay = new Date(now.setHours(23, 59, 59, 999));
 
-    const patients = await prisma.visit.findMany({
+    const patients = await prisma.patient.findMany({
       where: {
-        createdAt: {
-          gte: startOfDay,
-          lte: endOfDay,
+        visits: {
+          some: {
+            createdAt: {
+              gte: startOfDay,
+              lte: endOfDay,
+            },
+          },
         },
       },
-      orderBy: {
-        createdAt: "asc",
-      },
       include: {
-        patient: true,
+        user: true,
+        visits: true,
       },
     });
+
+    console.log(patients);
+    
     return {
       success: true,
       data: patients,

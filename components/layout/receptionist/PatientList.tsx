@@ -3,12 +3,12 @@
 import { lazy, Suspense, useState } from "react";
 import { Input } from "@/components/ui/input";
 import FallbackPatientList from "./FallbackPatientList";
-import { PatientWithVisits } from "@/lib/actions/patientActions";
+import { PatientWithUser } from "@/type/types";
 
 const PatientCard = lazy(() => import("./PatientCard"));
 
 type Props = {
-  patients: PatientWithVisits[];
+  patients: PatientWithUser[];
   componentType: "patient" | "appointment" | "visit";
 };
 
@@ -17,10 +17,11 @@ export function PatientList({ patients, componentType = "patient" }: Props) {
 
   const filtered = patients.filter(
     (p) =>
-      p.name.toLowerCase().includes(search.toLowerCase()) ||
-      (p.phone ?? "").includes(search),
+      p.user.username.toLowerCase().includes(search.toLowerCase()) ||
+      (p.user.phone ?? "").includes(search),
   );
 
+  
   return (
     <div className="space-y-4">
       <Input
