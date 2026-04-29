@@ -11,19 +11,23 @@ datasource db {
 // 👤 Users & Authentication
 // ==========================================
 model User {
-  id       String   @id @default(auto()) @map("_id") @db.ObjectId
-  username String
-  email    String   @unique
-  password String
-  role     UserType @default(assistant)
-  phone    String?  @unique
-  photo    String?
-  isActive Boolean  @default(true)
-
-  // 🔗 ربط اختياري مع مريض (1-to-1)
-  patientProfile Patient? @relation("UserPatientLink", fields: [patientId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  patientId      String?  @unique @db.ObjectId
-
+  id             String    @id @default(auto()) @map("_id") @db.ObjectId
+  username       String
+  email          String?   @unique
+  phone          String    @unique
+  password       String
+  role           UserType  @default(assistant)
+  birthDate      DateTime?
+  gender         Gender?
+  address        String?
+  profile_avatar String?
+  isActive       Boolean   @default(true)
+  isOnline       Boolean   @default(false)
+  isVerified     Boolean   @default(false)
+  lastLogin      DateTime? @default(now())
+  deviceInfo     Json?
+  networkInfo    Json?
+  patient      Patient?
   // Relations - Tasks & Appointments
   appointments Appointment[]
   tasks        Task[]
@@ -31,51 +35,47 @@ model User {
   invoices     Invoice[]
 
   // 🔁 Opposite Relations for Audit Fields (إصلاح خطأ العلاقات الناقصة)
-  createdPatients  Patient[]         @relation("PatientCreatedBy")
-  createdVisits    Visit[]           @relation("VisitCreatedBy")
-  uploadedImages   RadiologyImage[]  @relation("ImageUploadedBy")
+  createdPatients Patient[]        @relation("PatientCreatedBy")
+  createdVisits   Visit[]          @relation("VisitCreatedBy")
+  uploadedImages  RadiologyImage[] @relation("ImageUploadedBy")
+  deletedAt       DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([role])
+  @@index([deletedAt])
 }
 
 // ==========================================
 // 🏥 Patients (Medical Records)
 // ==========================================
 model Patient {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  name      String
-  phone     String
-  email     String?
-  birthDate DateTime?
-  gender    Gender?
-  address   String?
+  id     String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @unique @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade) // 1-to-1 with User
 
   // 📋 Medical History Summary
-  allergies   String[] 
-  medications String[] 
+  allergies   String[]
+  medications String[]
   notes       String?
 
-  // 🔗 علاقة عكسية مع User (بدون fields عشان نكسر الدورة)
-  user   User?   @relation("UserPatientLink")
-
   // Relations
-  visits       Visit[] 
-  images       RadiologyImage[] 
+  visits       Visit[]
+  images       RadiologyImage[]
   invoices     Invoice[]
   appointments Appointment[]
 
   // 👮 Audit: مين سجل المريض ده؟
-  createdById String? @db.ObjectId
-  createdBy   User?   @relation("PatientCreatedBy", fields: [createdById], references: [id])
+  createdById String?   @db.ObjectId
+  createdBy   User?     @relation("PatientCreatedBy", fields: [createdById], references: [id])
+  lastVisitAt DateTime?
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
-  @@index([phone])
-  @@index([email])
+  @@index([createdById])
 }
 
 // ==========================================
@@ -98,8 +98,9 @@ model Appointment {
   visitId String? @unique @db.ObjectId
   visit   Visit?  @relation(fields: [visitId], references: [id], onDelete: SetNull)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
   @@index([doctorId, startTime])
   @@index([patientId])
@@ -121,7 +122,7 @@ model Visit {
 
   // 🦷 Tooth Charting Example:
   // { "11": { "status": "caries", "surfaces": ["M", "O"] }, "16": "missing" }
-  toothChart     Json?
+  toothChart Json?
 
   patientId String  @db.ObjectId
   patient   Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
@@ -132,7 +133,7 @@ model Visit {
 
   // 👮 Audit
   createdById String? @db.ObjectId
-  createdBy   User?   @relation("VisitCreatedBy", fields: [createdById], references: [id])
+  createdBy   User?   @relation("VisitCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
 
   // 🗑️ Soft Delete
   deletedAt DateTime?
@@ -142,6 +143,8 @@ model Visit {
 
   @@index([patientId])
   @@index([visitDate])
+  @@index([createdById])
+  @@index([patientId, visitDate])
 }
 
 // ==========================================
@@ -175,18 +178,18 @@ model Invoice {
 
   @@index([patientId])
   @@index([status])
-  @@index([createdAt])
+  @@index([patientId, status]) // ADDED
 }
 
 // ==========================================
 // 📋 Internal Tasks
 // ==========================================
 model Task {
-  id       String  @id @default(auto()) @map("_id") @db.ObjectId
+  id       String    @id @default(auto()) @map("_id") @db.ObjectId
   title    String
   content  String?
-  isDone   Boolean @default(false)
-  priority Int     @default(1)
+  isDone   Boolean   @default(false)
+  priority Int       @default(1)
   dueDate  DateTime?
 
   userId String @db.ObjectId
@@ -202,7 +205,7 @@ model Task {
 // 🖼️ Radiology & Images
 // ==========================================
 model RadiologyImage {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
   url         String
   type        String?
   description String?
@@ -213,7 +216,7 @@ model RadiologyImage {
 
   // 👮 Audit: مين رفع الصورة؟
   uploadedById String? @db.ObjectId
-  uploadedBy   User?   @relation("ImageUploadedBy", fields: [uploadedById], references: [id])
+  uploadedBy   User?   @relation("ImageUploadedBy", fields: [uploadedById], references: [id], onDelete: SetNull)
 
   // 🗑️ Soft Delete
   deletedAt DateTime?
@@ -227,7 +230,7 @@ model RadiologyImage {
 // 📊 Activity Logs (Audit Trail)
 // ==========================================
 model ActivityLog {
-  id         String @id @default(auto()) @map("_id") @db.ObjectId
+  id         String  @id @default(auto()) @map("_id") @db.ObjectId
   action     String
   entityType String?
   entityId   String? @db.ObjectId

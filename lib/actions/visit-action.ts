@@ -1,7 +1,14 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
-import { Visit, VisitType } from "@/generated/prisma";
+import { Prisma, Visit, VisitType } from "@/generated/prisma";
 import prisma from "../db/db-connection";
 import { revalidatePath } from "next/cache";
+import { CreateVisitSchema } from "@/lib/validations/schema";
+import { SimpleVisitWithUserType } from "@/type/types";
+
+export type PatientWithVisits = Prisma.PatientGetPayload<{
+  include: { visits: true; user: true };
+}>;
 
 export type VisitFormState = {
   success: boolean;
@@ -69,57 +76,121 @@ export async function createPatientVisit(
   formData: FormData,
 ): Promise<VisitFormState> {
   try {
-    const type = formData.get("type") as VisitType;
-    const totalAmount = formData.get("totalAmount") as string;
-    const note_paid = formData.get("note_paid") as string;
-
-    const isType = [
-      "Initial",
-      "FollowUp",
-      "Emergency",
-      "Cleaning",
-      "Consultation",
-      "Surgery",
-    ];
-
-    if (!isType.includes(type))
-      return { success: false, error: "type is not define " };
-    if (isNaN(Number(totalAmount)) && Number(totalAmount) < 20)
-      return { success: false, error: "totalAmount is not define " };
     if (!createBy) {
-      return { success: false, error: "redirect" };
+      return { success: false, error: "Unauthorized" };
     }
-    if (!id) return { success: false, error: "patient not define " };
 
-    await prisma.$transaction(async (x) => {
-      const currnetVisit = await x.visit.create({
-        data: { patientId: id, type, createdById: createBy },
-      });
-      const invoiceNumber = `INV-${Date.now()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+    if (!id) {
+      return { success: false, error: "Patient not defined" };
+    }
 
-      await x.invoice.create({
-        data: {
-          totalAmount: Number(totalAmount),
-          createdById: createBy,
-          patientId: currnetVisit.patientId,
-          notes: note_paid || "",
-          visitId: currnetVisit.id,
-          invoiceNumber,
-        },
-      });
+    const parsed = CreateVisitSchema.safeParse({
+      type: formData.get("type"),
+      totalAmount: formData.get("totalAmount"),
+      note_paid: formData.get("note_paid"),
     });
 
-    revalidatePath("/patients");
+    if (!parsed.success) {
+      return {
+        success: false,
+        error: parsed.error.issues[0].message,
+      };
+    }
+
+    const { type, totalAmount, note_paid } = parsed.data;
+
+    const startDate = new Date();
+    startDate.setHours(0, 0, 0, 0);
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const existingVisit = await prisma.visit.findFirst({
+      where: {
+        patientId: id,
+        visitDate: {
+          gte: startDate,
+          lte: endOfDay,
+        },
+      },
+    });
+
+    if (existingVisit) {
+      return {
+        success: false,
+        error: "Patient already has a visit today",
+      };
+    }
+
+    const invoiceNumber = `INV-${Date.now()}-${Math.random()
+      .toString(36)
+      .substring(2, 7)
+      .toUpperCase()}`;
+
+    try {
+      await prisma.$transaction(async (x) => {
+        const patient = await x.patient.findUnique({
+          where: { id },
+        });
+
+        if (!patient) {
+          throw new Error("PATIENT_NOT_FOUND");
+        }
+
+        const visit = await x.visit.create({
+          data: {
+            patientId: patient.id,
+            type: type,
+            createdById: createBy,
+          },
+        });
+
+        await x.invoice.create({
+          data: {
+            totalAmount,
+            paidAmount: 0,
+            createdById: createBy,
+            patientId: patient.id,
+            visitId: visit.id,
+            notes: note_paid || "",
+            invoiceNumber,
+          },
+        });
+      });
+    } catch (err: any) {
+      if (err.message === "PATIENT_NOT_FOUND") {
+        return { success: false, error: "Patient not found" };
+      }
+
+      // 👇 unique constraint (race condition)
+      if (err.code === "P2002") {
+        return {
+          success: false,
+          error: "Patient already has a visit today",
+        };
+      }
+
+      console.error(err);
+
+      return {
+        success: false,
+        error: "Failed to create visit",
+      };
+    }
+
+    revalidatePath("/receptionist", "layout");
 
     return { success: true };
-  } catch (error) {
-    console.error("Database Error:", error);
-    return { success: false, error: "can not create visit " + error };
+  } catch (error: any) {
+    console.error("Unexpected Error:", error);
+
+    return {
+      success: false,
+      error: "Something went wrong",
+    };
   }
 }
-
 export async function prevCreateVisit(
-  { id }: { id: string |undefined},
+  { id }: { id: string | undefined },
   prevState: VisitFormState,
   formData: FormData,
 ): Promise<VisitFormState> {
@@ -142,15 +213,11 @@ export async function prevCreateVisit(
 
     let IdExist = true;
     await prisma.$transaction(async (x) => {
-      const patient = await x.user.findUnique({
-        where: {
-          patientId: id,
-        },
-      });
+      const patient = false;
 
       if (patient) {
         await x.visit.create({
-          data: { patientId: id, type, createdById: patient?.id },
+          data: { patientId: id, type, createdById: "8989898989898989" },
         });
       } else {
         IdExist = false;
@@ -159,7 +226,6 @@ export async function prevCreateVisit(
 
     if (!IdExist) return { success: false, error: "patient not define " };
 
-    
     revalidatePath("/patients");
     revalidatePath("/assistant");
 
@@ -172,33 +238,48 @@ export async function prevCreateVisit(
 
 export async function getTodayVisits(): Promise<{
   success: boolean;
-  data?: Visit[];
+  data?: SimpleVisitWithUserType[];
   error?: string;
-  count?: number;
 }> {
   try {
     const now = new Date();
     const startOfDay = new Date(now.setHours(0, 0, 0, 0));
     const endOfDay = new Date(now.setHours(23, 59, 59, 999));
 
-    const patients = await prisma.visit.findMany({
+    const visits = await prisma.visit.findMany({
       where: {
-        createdAt: {
-          gte: startOfDay,
-          lte: endOfDay,
-        },
-      },
-      orderBy: {
-        createdAt: "asc",
+        visitDate: { gte: startOfDay, lte: endOfDay },
+        OR: [{ deletedAt: null }, { deletedAt: { isSet: false } }],
       },
       include: {
-        patient: true,
+        patient: {
+          select: {
+            user: {
+              select: {
+                username: true,
+                id: true,
+                phone: true,
+                gender: true,
+              },
+            },
+          },
+        },
       },
     });
+
+    const data = visits.map((user) => ({
+      visitId: user.id,
+      visitType: user.type,
+      patientId: user.patientId,
+      username: user.patient.user.username,
+      phone: user.patient.user.phone,
+      gender: user.patient.user.gender,
+      userId: user.patient.user.id,
+    })) as SimpleVisitWithUserType[];
+
     return {
       success: true,
-      data: patients,
-      count: patients.length,
+      data,
     };
   } catch (error) {
     console.error("Error fetching today patients:", error);
@@ -206,7 +287,6 @@ export async function getTodayVisits(): Promise<{
       success: false,
       error: "can not get patient data",
       data: [],
-      count: 0,
     };
   }
 }
@@ -254,17 +334,22 @@ export async function deleteVisit({
   }
 
   if (!deleteBy) {
-    return { success: false, error: "redirect" };
+    return { success: false, error: "unuthorized" };
   }
 
   try {
     await prisma.$transaction(async (x) => {
-      await x.invoice.delete({ where: { visitId } });
-      await x.visit.delete({
+      await x.invoice.update({
+        where: { visitId },
+        data: { deletedAt: new Date() },
+      });
+      await x.visit.update({
         where: { id: visitId },
+        data: { deletedAt: new Date() },
       });
     });
-    revalidatePath("patients");
+    revalidatePath("/receptionist", "layout");
+    revalidatePath("/api/visit");
     return {
       success: true,
     };

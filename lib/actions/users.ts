@@ -174,7 +174,7 @@ export async function getUser(userId: string, email: string) {
       id: true,
       username: true,
       email: true,
-      photo: true,
+      profile_avatar: true,
       role: true,
       phone: true,
       isActive: true,
@@ -193,3 +193,4 @@ export async function getUser(userId: string, email: string) {
   }
   return user;
 }
+

@@ -1,3 +1,4 @@
+import { Footer } from "@/components/CopyrightFooter";
 import { OurServicesSection } from "@/pages/home/OurServicesSection";
 import { ResultsSection } from "@/pages/home/ResultsSection";
 import { StatsSection } from "@/pages/home/StatsSection";
@@ -6,7 +7,7 @@ import { WhyChooseUsSection } from "@/pages/home/WhyChooseUsSection";
 import Link from "next/link";
 export default function Home() {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-fit h-full overflow-y-scroll overflow-x-hidden">
       {/* Hero Section */}
       <section className="flex flex-col items-center justify-center py-20 px-4 text-center bg-linear-to-b from-background to-muted/20">
         <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-linear-to-r from-primary to-accent bg-clip-text text-transparent animate-in fade-in slide-in-from-bottom-4 duration-1000">
@@ -37,9 +38,9 @@ export default function Home() {
       {/* Features Section */}
       <WhyChooseUsSection />
 
-      <OurServicesSection/>
-      <TotalAnesthesiaSection/>
-      <ResultsSection/>
+      <OurServicesSection />
+      <TotalAnesthesiaSection />
+      <ResultsSection />
       {/* How It Works / About Section */}
       <section className="py-20 px-4 bg-muted/30">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-12">
@@ -97,6 +98,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <Footer />
     </div>
   );
 }

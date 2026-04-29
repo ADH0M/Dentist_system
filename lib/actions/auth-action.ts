@@ -5,17 +5,14 @@ import { cookies } from "next/headers";
 import prisma from "../db/db-connection";
 import bcrypt from "bcryptjs";
 import { signToken, type JwtPayload } from "../utils/jwt";
+import { loginSchema, registrationSchema } from "../validations/schema";
 
+export type SignupErrors = { path: string; message: string };
 export type SignupFormState = {
   message?: string;
-  errors?: {
-    username?: string[];
-    email?: string[];
-    phone?: string[];
-    password?: string[];
-    confirmPassword?: string[];
-    general?: string;
-  };
+  path?: string;
+  errors?: SignupErrors[];
+  success?:boolean;
 };
 
 export async function registerAction(
@@ -27,116 +24,84 @@ export async function registerAction(
   const password = formData.get("password") as string;
   const phone = formData.get("phone") as string;
   const confirmPassword = formData.get("confirmPassword") as string;
+  const terms = formData.get("terms") as "on" | "off";
+
+  const userData = {
+    username,
+    email,
+    phone,
+    password,
+    confirmPassword,
+    terms: terms === "on" ? true : "",
+  };
 
   // Validation
-  const errors: {
-    phone?: string[];
-    username?: string[];
-    email?: string[];
-    password?: string[];
-    confirmPassword?: string[];
-    general?: string;
-  } = {};
 
-  let hasErrors = false;
-
-  if (!username || username.length < 2) {
-    errors.username = ["Username must be at least 2 characters long."];
-    hasErrors = true;
-  }
-
-  const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
-  if (!email || !emailRegex.test(email)) {
-    errors.email = ["Please enter a valid email address."];
-    hasErrors = true;
-  }
-
-  if (!password || password.length < 6) {
-    errors.password = ["Password must be at least 6 characters long."];
-    hasErrors = true;
-  }
-
-  if (password !== confirmPassword) {
-    errors.confirmPassword = ["Passwords do not match."];
-    hasErrors = true;
-  }
-
-  if (phone.length !== 11) {
-    errors.phone = ["phone must be 11 numbers."];
-    hasErrors = true;
-  }
-
-  if (hasErrors) {
-    return { message: "Validation failed.", errors };
+  const schema = registrationSchema.safeParse(userData);
+  if (!schema.success) {
+    console.log(schema.error.issues);
+    const validError = schema.error.issues.map((err, ind) => {
+      return {
+        message: err.message,
+        path: (err.path[0] as string) || `${ind}`,
+      };
+    });
+    return { message: "Validation failed.", errors: validError };
   }
 
   try {
     let existingUser = false;
+    let existingPhone = false;
     await prisma.$transaction(async (t) => {
-      const findUser = await prisma.user.findUnique({ where: { email } });
-      const findPatinet = await prisma.user.findFirst({ where: { email } });
+      const findEmail = await t.user.findUnique({ where: { email } });
+      const findPhone = await t.user.findUnique({ where: { phone } });
 
-      if (findPatinet || findUser) existingUser = true;
+      if (findPhone) existingPhone = true;
+      if (findEmail) existingUser = true;
     });
 
     if (existingUser) {
       return {
         message: "User already exists.",
-        errors: {
-          general: "An account with this email already exists.",
-        },
+        path: "An account with this email already exists.",
       };
     }
 
-    let existingPhone = false;
-    await prisma.$transaction(async (t) => {
-      const findUser = await prisma.user.findUnique({ where: { phone } });
-      const findPatinet = await prisma.user.findFirst({ where: { phone } });
-
-      if (findPatinet || findUser) existingPhone = true;
-    });
-
     if (existingPhone) {
       return {
-        message: "P already exists.",
-        errors: {
-          general: "An account with this phone already exists.",
-        },
+        message: "Phone already exists.",
+        path: "An account with this phone already exists.",
       };
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
     await prisma.$transaction(async (t) => {
-      const patient = await t.patient.create({
-        data: {
-          email,
-          name: username,
-          phone,
-        },
-      });      
-      await t.user.create({
+      const user = await t.user.create({
         data: {
           email,
           username,
           password: hashedPassword,
           role: "patient",
-          patientId: patient.id,
-          phone
+          phone,
         },
       });
+
+      await t.patient.create({
+        data: {
+          userId: user.id,
+        },
+      });
+
     });
+
+    return {success:true}
   } catch (error: any) {
     console.error("Signup error:", error);
     return {
       message: "Something went wrong.",
-      errors: {
-        general: "Failed to create account. Please try again later.",
-      },
+      path: "Failed to create account. Please try again later.",
     };
   }
-
-  redirect("/login");
 }
 
 export async function loginUpAction(
@@ -145,28 +110,13 @@ export async function loginUpAction(
 ): Promise<SignupFormState> {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
+  
   // Validation
-  const errors: {
-    email?: string[];
-    password?: string[];
-    general?: string;
-  } = {};
+  const loginValidation = loginSchema.safeParse({email ,password});
 
-  let hasErrors = false;
-
-  const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
-  if (!email || !emailRegex.test(email)) {
-    errors.email = ["Please enter a valid email address."];
-    hasErrors = true;
-  }
-
-  if (!password || password.length < 6) {
-    errors.password = ["Password must be at least 6 characters long."];
-    hasErrors = true;
-  }
-
-  if (hasErrors) {
-    return { message: "Validation failed.", errors };
+  if(!loginValidation.success){
+    const errors = loginValidation.error.issues.map((err)=>({path:err.path[0] as string ,message:err.message}))
+    return {errors}
   }
 
   try {
@@ -174,24 +124,25 @@ export async function loginUpAction(
 
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
-      return { errors: { general: "Invalid credentials" } };
+      return { path: "Invalid credentials" ,message: "User Email Not Match Password "};
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
+
     if (!isMatch) {
-      return { errors: { general: "Invalid credentials" } };
+      return {  path: "Invalid credentials"  ,message: "User Email Not Match Password"} 
     }
+    
 
     const tokenPayload: Omit<JwtPayload, "iat" | "exp"> = {
       userId: user.id,
       username: user.username,
-      email: user.email,
+      email: user.email || undefined,
       phone: user.phone || undefined,
       role: user.role,
-      patientId: user.patientId || undefined,
     };
 
-    const token = signToken(tokenPayload);
+    const token = await signToken(tokenPayload);
 
     cookieStore.set("token", token, {
       httpOnly: true,
@@ -202,32 +153,24 @@ export async function loginUpAction(
     });
 
     cookieStore.set("userId", user.id);
-    cookieStore.set("email", user.email);
+    cookieStore.set("email", user.email||'');
     cookieStore.set("username", user.username);
     cookieStore.set("role", user.role);
+    return {success:true}
   } catch (error: any) {
     console.error("Login error:", error);
     return {
       message: "Something went wrong.",
-      errors: {
-        general: "Failed to login. Please try again later.",
-      },
+       path: "Failed to login. Please try again later.",
     };
   }
-
-  redirect("/");
 }
 
 export async function logoutAction() {
   try {
     const cookieStore = await cookies();
     const email = cookieStore.get("email")?.value as string;
-    if (email) {
-      await prisma.user.update({
-        where: { email: email },
-        data: { isActive: false },
-      });
-    }
+    
     cookieStore.delete("token");
     cookieStore.delete("userId");
     cookieStore.delete("email");
@@ -236,6 +179,40 @@ export async function logoutAction() {
   } catch (error: any) {
     console.error("Logout error:", error);
   } finally {
-    redirect("/login");
+    redirect("/");
+  }
+}
+
+export async function isExistEmail(email: string): Promise<boolean> {
+  try {
+    if (!email) {
+      return false;
+    }
+
+    const checkEmail = await prisma.user.findUnique({
+      where: { email: email },
+    });
+
+    return checkEmail ? true : false;
+  } catch (error: any) {
+    console.error("check is email error:", error);
+    return false;
+  }
+}
+
+export async function isExistPhone(phone: string): Promise<boolean> {
+  try {
+    if (!phone) {
+      return false;
+    }
+
+    const checkPhone = await prisma.user.findUnique({
+      where: { phone },
+    });
+
+    return checkPhone ? true : false;
+  } catch (error: any) {
+    console.error("check is Phone error:", error);
+    return false;
   }
 }

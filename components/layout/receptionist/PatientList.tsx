@@ -1,50 +1,42 @@
 "use client";
 
-import { lazy, Suspense, useState } from "react";
-import { Input } from "@/components/ui/input";
+import { lazy, Suspense } from "react";
 import FallbackPatientList from "./FallbackPatientList";
-import { PatientWithVisits } from "@/lib/actions/patientActions";
+import { PatientWithUser } from "@/type/types";
+import ReceptionistSearch, { UserSimpleInfo } from "./ReceptionistSearch";
 
 const PatientCard = lazy(() => import("./PatientCard"));
 
 type Props = {
-  patients: PatientWithVisits[];
-  componentType: "patient" | "appointment" | "visit";
+  patients: PatientWithUser[];
 };
 
-export function PatientList({ patients, componentType = "patient" }: Props) {
-  const [search, setSearch] = useState("");
-
-  const filtered = patients.filter(
-    (p) =>
-      p.name.toLowerCase().includes(search.toLowerCase()) ||
-      (p.phone ?? "").includes(search),
-  );
+export function PatientList({ patients }: Props) {
+  const serializePatient = patients.map((patient)=>({
+    patientId:patient.id ,
+    userId:patient.user.id,
+    username:patient.user.username,
+    email:patient.user.email,
+    gender:patient.user.gender,
+    phone:patient.user.phone
+  })) as UserSimpleInfo[];
 
   return (
     <div className="space-y-4">
-      <Input
-        placeholder="Search patient by name or phone..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="w-full max-w-md"
-      />
+      <ReceptionistSearch />
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <Suspense fallback={<FallbackPatientList />}>
           {patients.length ? (
-            filtered.map((patient, ind) => (
-              <PatientCard key={patient.id} patient={patient} num={ind} componentType={componentType}/>
+            serializePatient.map((patient, ind) => (
+              <PatientCard
+                key={patient.patientId+" "+patient.userId}
+                patient={patient}
+                num={ind}
+                componentType={"cards"}
+              />
             ))
           ) : (
-            <div className="text-sm mt-1">
-              there are no{" "}
-              {componentType === "patient"
-                ? "patients"
-                : componentType === "appointment"
-                  ? "appointments"
-                  : "visits"}{" "}
-              yet .
-            </div>
+            <div className="text-sm mt-1">there are no patients yet .</div>
           )}
         </Suspense>
       </div>
