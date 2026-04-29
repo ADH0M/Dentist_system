@@ -3,6 +3,7 @@ import Sidebar from "@/components/Aside";
 import { cookies } from "next/headers";
 import { UserType } from "@/generated/prisma";
 import { redirect } from "next/navigation";
+import PatientDetailsModal from "@/components/layout/doctor/PatientDetailsModal";
 
 const layout = async ({ children }: { children: React.ReactNode }) => {
   const cookieStore = await cookies();
@@ -22,16 +23,21 @@ const layout = async ({ children }: { children: React.ReactNode }) => {
   //   redirect("/patient");
   // }
 
-  if (role !== "admin" && role !== "assistant" && role !== "receptionist" && role !=='patient') {
+  if (
+    role !== "admin" &&
+    role !== "assistant" &&
+    role !== "receptionist" &&
+    role !== "patient"
+  ) {
     redirect("/");
   }
 
   return (
     <div className="flex h-full overflow-hidden ">
-       <Sidebar user={currentUser} />
-      <div className="flex-1 overflow-x-hidden overflow-y-scroll">
+      <Sidebar user={currentUser} />
+      <main className="flex-1 overflow-x-hidden overflow-y-scroll">
         {children}
-      </div>
+      </main>
     </div>
   );
 };

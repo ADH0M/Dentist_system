@@ -177,20 +177,19 @@ export async function getTodayPatients(): Promise<{
         createdAt: "asc",
       },
       select: {
-        id:true ,
-        createdAt:true,
-        user:{
-          select:{
-            id:true,
-            username:true,
-            email:true,
-            phone:true,
-            gender:true,
-          }
+        id: true,
+        createdAt: true,
+        user: {
+          select: {
+            id: true,
+            username: true,
+            email: true,
+            phone: true,
+            gender: true,
+          },
         },
-      }
+      },
     });
-
 
     return {
       success: true,
@@ -228,4 +227,107 @@ export async function deletePatient({
     console.error("Database Error:", error);
     return { success: false, error: "Fail to delete patient" };
   }
+}
+
+export async function getPatientData(patientId: string) {
+  const patient = await prisma.patient.findUnique({
+    where: {
+      id: patientId,
+      OR: [{ deletedAt: null }, { deletedAt: { isSet: false } }],
+    },
+    include: {
+      user: {
+        select: {
+          id: true,
+          username: true,
+          email: true,
+          phone: true,
+          birthDate: true,
+          gender: true,
+          address: true,
+          profile_avatar: true,
+        },
+      },
+      visits: {
+        orderBy: { visitDate: "desc" },
+        take: 1,
+        select: {
+          id: true,
+          visitDate: true,
+          type: true,
+          chiefComplaint: true,
+          diagnosis: true,
+          treatmentPlan: true,
+          proceduresDone: true,
+          toothChart: true,
+        },
+      },
+
+      invoices: {
+        where: { OR: [{ deletedAt: null }, { deletedAt: { isSet: false } }] },
+        orderBy: { createdAt: "desc" },
+        take: 5,
+        select: {
+          id: true,
+          invoiceNumber: true,
+          totalAmount: true,
+          paidAmount: true,
+          status: true,
+          dueDate: true,
+        },
+      },
+      images: {
+        where: { OR: [{ deletedAt: null }, { deletedAt: { isSet: false } }] },
+        orderBy: { createdAt: "desc" },
+        take: 10,
+        select: {
+          id: true,
+          url: true,
+          type: true,
+          description: true,
+          toothNumber: true,
+          createdAt: true,
+        },
+      },
+      _count: {
+        select: {
+          visits: true,
+          appointments: true,
+          invoices: true,
+          images: true,
+        },
+      },
+    },
+  });
+
+  if (!patient) {
+    return null;
+  }
+
+  // Get all visits for history
+  const allVisits = await prisma.visit.findMany({
+    where: { patientId: patientId, deletedAt: null },
+    orderBy: { visitDate: "desc" },
+    select: {
+      id: true,
+      visitDate: true,
+      type: true,
+      chiefComplaint: true,
+      diagnosis: true,
+      treatmentPlan: true,
+      proceduresDone: true,
+      toothChart: true,
+      createdBy: {
+        select: {
+          username: true,
+        },
+      },
+    },
+  });
+
+  return {
+    ...patient,
+    allVisits,
+    latestVisit: patient.visits[0] || null,
+  };
 }
