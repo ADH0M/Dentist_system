@@ -170,12 +170,7 @@ export async function logoutAction() {
   try {
     const cookieStore = await cookies();
     const email = cookieStore.get("email")?.value as string;
-    if (email) {
-      await prisma.user.update({
-        where: { email: email },
-        data: { isOnline: false },
-      });
-    }
+    
     cookieStore.delete("token");
     cookieStore.delete("userId");
     cookieStore.delete("email");

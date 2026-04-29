@@ -12,7 +12,6 @@ import {
   PatientError,
   PatientFormState,
   PatientWithUser,
-  PatientWithVisits,
 } from "@/type/types";
 
 export async function createPatient(
@@ -177,12 +176,21 @@ export async function getTodayPatients(): Promise<{
       orderBy: {
         createdAt: "asc",
       },
-      include: {
-        user: true,
-      },
+      select: {
+        id:true ,
+        createdAt:true,
+        user:{
+          select:{
+            id:true,
+            username:true,
+            email:true,
+            phone:true,
+            gender:true,
+          }
+        },
+      }
     });
 
-    console.log(patients, "form server llllllllllllllllllllllll");
 
     return {
       success: true,

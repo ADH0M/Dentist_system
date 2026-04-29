@@ -1,4 +1,4 @@
-import { Prisma } from "@/generated/prisma";
+import { Gender, Prisma } from "@/generated/prisma";
 
 // ===========================================================================
 //                              Patients Types
@@ -7,9 +7,20 @@ export type PatientWithVisits = Prisma.PatientGetPayload<{
 }>;
 
 export type PatientWithUser = Prisma.PatientGetPayload<{
-  include: { user:true};
+  select: {
+    id: true;
+    createdAt: true;
+    user: {
+      select: {
+        id: true;
+        username: true;
+        email: true;
+        phone: true;
+        gender: true;
+      };
+    };
+  };
 }>;
-
 
 export type PatientError = {
   username?: string;
@@ -39,3 +50,38 @@ export type P_VisitsInvoicesImages = Prisma.PatientGetPayload<{
 }>;
 
 // ===========================================================================
+//                                 User
+export type UserInfo =Prisma.UserGetPayload<{select:{id:true ,username:true , gender:true ,phone:true}}>
+
+
+
+
+
+// =============================================================================
+//                                 Visits
+
+export type SimpleVisitWithUserType = {
+visitId:string;
+visitType:string;
+patientId:string;
+username:string;
+phone:string;
+gender:Gender;
+userId:string;
+};
+
+export type SimplePatientVisitType = Prisma.VisitGetPayload<{
+  select:{
+    id:true,
+    createdAt:true,
+    deletedAt:true,
+    type:true,
+    patientId:true,
+    invoice:{
+      select:{
+        paidAmount:true,
+        totalAmount:true,
+      }
+    }
+  }
+}>

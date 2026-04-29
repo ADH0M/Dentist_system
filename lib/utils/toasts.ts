@@ -44,4 +44,12 @@ export function RegistarToast({
       },
     );
   }
+};
+
+export function RejectedToast (msg:string){
+  return toast.error(`${msg}` , {position:'top-left'})
+}
+
+export function SuccessToast (msg:string){
+  return toast.success(`${msg}` , {position:'top-left'})
 }

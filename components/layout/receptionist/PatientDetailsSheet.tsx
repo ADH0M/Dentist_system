@@ -7,11 +7,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import {
-  createPatientVisit,
-  deleteVisit,
-  updateVisit,
-} from "@/lib/actions/visit-action";
+import { createPatientVisit } from "@/lib/actions/visit-action";
 import { memo, useActionState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { redirect } from "next/navigation";
@@ -19,13 +15,14 @@ import { useSelectorHook } from "@/hooks/useSelector";
 import { deletePatient } from "@/lib/actions/patientActions";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { PatientWithUser } from "@/type/types";
+import { RejectedToast, SuccessToast } from "@/lib/utils/toasts";
+import { UserSimpleInfo } from "./ReceptionistSearch";
+import { logoutAction } from "@/lib/actions/auth-action";
 
 type Props = {
-  patient: PatientWithUser;
+  patient: UserSimpleInfo;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  componentType: "patient" | "appointment" | "visit";
 };
 
 const visitType = [
@@ -37,12 +34,7 @@ const visitType = [
   "Surgery",
 ];
 
-function PatientDetailsSheet({
-  patient,
-  open,
-  onOpenChange,
-  componentType,
-}: Props) {
+function PatientDetailsSheet({ patient, open, onOpenChange }: Props) {
   const intialState: { success: boolean; error?: string } = {
     success: false,
     error: "",
@@ -51,42 +43,26 @@ function PatientDetailsSheet({
   const createBy = assistant?.data?.id;
 
   const [state, formAction, pending] = useActionState(
-    createPatientVisit.bind(null, { id: patient.id, createBy }),
+    createPatientVisit.bind(null, { id: patient.patientId, createBy }),
     intialState,
   );
-
-  // const [update, updateFormAction, updatePending] = useActionState(
-  //   updateVisit.bind(null, {
-  //     visitId: patient.visits.length
-  //       ? patient.visits[patient.visits.length - 1].id
-  //       : "",
-  //   }),
-  //   intialState,
-  // );
 
   const [deleteState, deletePatientAction, deletePending] = useActionState(
-    deletePatient.bind(null, { id: patient.id }),
+    deletePatient.bind(null, { id: patient.userId }),
     intialState,
   );
 
-  const handleDeleteVisit = async (id: string) => {
-    const res = await deleteVisit({
-      visitId: id,
-      deleteBy: createBy,
-    });
-
-    console.log(res);
-
-    if (!res.success && res.error === "redirect") {
-      redirect("/");
-    }
-  };
-
+  const componentType = useSelectorHook(
+    (state) => state.receptionistReducer.type,
+  );
   useEffect(() => {
     if (state.success) {
       setTimeout(() => {
         onOpenChange(false);
+        SuccessToast("create visit successfuly");
       }, 1000);
+    } else if (!state.success && state.error) {
+      RejectedToast(state.error);
     }
 
     if (!state.success && state.error === "redirect") {
@@ -102,22 +78,25 @@ function PatientDetailsSheet({
     }
   }, [deleteState.success, onOpenChange]);
 
-  // useEffect(() => {
-  //   if (!update.success && update.error === "redirect") {
-  //     setTimeout(() => {
-  //       onOpenChange(false);
-  //       redirect("/");
-  //     }, 500);
-  //   }
-  // }, [update.success, update.error, onOpenChange]);
+  useEffect(() => {
+    if (!state.success && state.error === "Unauthorized") {
+      const timeout = setTimeout(() => {
+        onOpenChange(false);
+        redirect("/");
+      }, 500);
+      logoutAction();
+
+      return ()=>clearTimeout(timeout);
+    }
+  }, [state ,onOpenChange]);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
+      <SheetContent className="w-full sm:max-w-xl overflow-y-auto border-border">
         <SheetHeader>
-          <SheetTitle className="text-2xl">{patient.user.username}</SheetTitle>
+          <SheetTitle className="text-2xl">{patient.username}</SheetTitle>
 
-          {componentType === "patient" && (
+          {componentType === "patients" && (
             <form
               action={deletePatientAction}
               className="flex justify-center items-center"
@@ -133,20 +112,14 @@ function PatientDetailsSheet({
           <div className="bg-card border border-border rounded-lg p-4">
             <h3 className="font-semibold text-foreground">Patient Info</h3>
             <p className="text-sm text-muted-foreground">
-              Phone: {patient.user.phone ?? "—"}
+              Phone: {patient.phone ?? "—"}
             </p>
             <p className="text-sm text-muted-foreground">
-              gender: {patient.user.gender ?? "—"}
+              gender: {patient.gender ?? "—"}
             </p>
-            {/* {componentType === "visit" && (
-              <p className="text-sm text-muted-foreground">
-                last visit :{" "}
-                {patient.user.}
-              </p>
-            )} */}
           </div>
 
-          {componentType === "appointment" && (
+          {componentType === "appointments" && (
             <div className="bg-card border border-border rounded-lg p-4 space-y-2">
               <h3 className="font-semibold text-foreground">Appointments</h3>
               {/* هنا نضيف AppointmentList لل patient */}
@@ -159,17 +132,9 @@ function PatientDetailsSheet({
             </div>
           )}
 
-          {componentType === "patient" && (
+          {componentType === "patients" && (
             <div className="bg-card border border-border rounded-lg p-4 space-y-2">
               <h3 className="font-semibold text-foreground">Visits</h3>
-              {/* هنا نعرض Visits مختصر مع إمكانية فتح ToothChart */}
-              {/* <p className="text-sm text-muted-foreground">
-                total visit :{" "}
-                {patient.visits?.length
-                  ? patient.visits?.length
-                  : "No visits yet"}
-              </p> */}
-
               <form action={formAction}>
                 <Label>Visit Type</Label>
                 <select
@@ -199,7 +164,7 @@ function PatientDetailsSheet({
                 />
 
                 <div>
-                  <Label className="mt-2">note for paid</Label>
+                  <Label className="mt-2">Note for paid</Label>
                   <Textarea
                     name="note_paid"
                     maxLength={200}
@@ -216,7 +181,7 @@ function PatientDetailsSheet({
             </div>
           )}
 
-          {componentType === "visit" && (
+          {componentType === "visits" && (
             <div className="bg-card border border-border rounded-lg p-4 space-y-2 relative w-full">
               <h3 className="font-semibold text-foreground">Visits</h3>
               {/* <p className="text-sm text-muted-foreground">

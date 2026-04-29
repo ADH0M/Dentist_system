@@ -79,3 +79,28 @@ export const NewPatientValid = z.object({
 });
 
 export type NewPatientType = z.infer<typeof NewPatientValid>;
+
+
+export const SearchWithPhone = z
+  .string()
+  .regex(/^01[0125][0-9]{1,8}$/, "Invalid phone number");
+
+
+
+export const CreateVisitSchema = z.object({
+  type: z.enum([
+    "Initial",
+    "FollowUp",
+    "Emergency",
+    "Cleaning",
+    "Consultation",
+    "Surgery",
+  ]),
+  totalAmount: z
+    .string()
+    .transform((val) => Number(val))
+    .refine((val) => !isNaN(val) && val >= 20, {
+      message: "Amount must be at least 20",
+    }),
+  note_paid: z.string().optional(),
+});

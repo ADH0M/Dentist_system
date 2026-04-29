@@ -4,6 +4,7 @@ import { AddPatientDialog } from "./AddPatientDialog";
 import { AddAppointmentDialog } from "./AddAppoitmentDailog";
 import { useSelectorHook } from "@/hooks/useSelector";
 import { PatientWithUser } from "@/type/types";
+import VisitList from "./ReceptionistVisitList";
 
 export default function ReceptionistDashboard({
   patients,
@@ -33,7 +34,7 @@ export default function ReceptionistDashboard({
 
         {/* Content based on tab */}
         {selectedTab.type === "patients" && patients && (
-          <PatientList patients={patients} componentType="patient" />
+          <PatientList patients={patients} />
         )}
 
         {selectedTab.type === "appointments" && (
@@ -46,13 +47,10 @@ export default function ReceptionistDashboard({
         {selectedTab.type === "visits" && patients && (
           <div className="text-sm text-muted-foreground">
             {/* Placeholder for Visits Table / List */}
-            {/* <PatientList
-              componentType="visit"
-            /> */}
+            <VisitList/>
           </div>
         )}
       </main>
     </div>
   );
 }
-
