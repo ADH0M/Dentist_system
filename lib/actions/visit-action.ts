@@ -177,7 +177,7 @@ export async function createPatientVisit(
       };
     }
 
-    revalidatePath("/patients");
+    revalidatePath("/receptionist", "layout");
 
     return { success: true };
   } catch (error: any) {
@@ -348,7 +348,7 @@ export async function deleteVisit({
         data: { deletedAt: new Date() },
       });
     });
-    revalidatePath("/receptionist");
+    revalidatePath("/receptionist", "layout");
     revalidatePath("/api/visit");
     return {
       success: true,

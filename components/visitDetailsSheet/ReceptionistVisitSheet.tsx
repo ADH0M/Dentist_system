@@ -13,6 +13,7 @@ import { SimpleVisitWithUserType } from "@/type/types";
 import { CalendarIcon, CircleDollarSign, UserIcon } from "lucide-react";
 import { getPatientVisitsAction } from "@/store/reducers/patientVisitReducer";
 import { deleteVisit } from "@/lib/actions/visit-action";
+import { useRouter } from "next/navigation";
 
 type Props = {
   patient: SimpleVisitWithUserType;
@@ -30,6 +31,7 @@ const visitType = [
 ];
 
 function ReceptionistVisitSheet({ patient, open, onOpenChange }: Props) {
+  const router = useRouter();
   const assistant = useSelectorHook((state) => state.authReducer);
   const createBy = assistant?.data?.id;
   const dispatch = useDispatchHook();
@@ -37,15 +39,18 @@ function ReceptionistVisitSheet({ patient, open, onOpenChange }: Props) {
     (state) => state.patientVisitReducer,
   );
 
+
   const handleDeleteVisit = async (data: {
     visitId: string;
     deleteBy: string;
   }) => {
     if (!data.deleteBy) return;
     if (!data.visitId) return;
+
     const delVisit = await deleteVisit(data);
     if (delVisit.success) {
       SuccessToast("delete visit successfuly");
+      router.refresh();
     } else if (delVisit.error && !delVisit.success) {
       RejectedToast(delVisit.error);
     }

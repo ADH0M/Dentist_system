@@ -4,15 +4,13 @@ import AssistantPatientForm from "@/pages/AssistantForm";
 import DrAssistantForm from "@/pages/DrAssistantForm";
 
 const page = async () => {
-  const patients = await getTodayPatients();   
-  
+  const patients = await getTodayPatients();
+
   return (
     <>
-      {patients.success && (
-        <ReceptionistDashboard patients={patients.data} />
-      )}
-    {/* <AssistantPatientForm/>
-    <DrAssistantForm/> */}
+      {patients.success && <ReceptionistDashboard patients={patients.data} />}
+
+      <DrAssistantForm />
     </>
   );
 };
