@@ -22,6 +22,8 @@ import PatientMedicalForm from "@/components/layout/doctor/PatientMedicalForm";
 import { getPatientData } from "@/lib/actions/patientActions";
 import Link from "next/link";
 import PatientInvoices from "@/components/layout/doctor/PatientInvoices";
+import VisitMedicalForm from "@/components/layout/doctor/VisitMedicalForm";
+import { cookies } from "next/headers";
 
 export default async function PatientPage({
   params,
@@ -30,7 +32,10 @@ export default async function PatientPage({
 }) {
   const { id } = await params;
   const patient = await getPatientData(id);
-
+  const cookieStore = await cookies();
+  const uploadedById = cookieStore.get('userId')?.value;
+  
+  
   if (!patient) {
     notFound();
   }
@@ -47,7 +52,9 @@ export default async function PatientPage({
         >
           ← Back to Dashboard
         </Link>
-        <h1 className="text-2xl font-bold text-chart-2">Patient Medical Record</h1>
+        <h1 className="text-2xl font-bold text-chart-2">
+          Patient Medical Record
+        </h1>
       </div>
 
       {/* Patient Basic Information Card */}
@@ -144,12 +151,18 @@ export default async function PatientPage({
         {/* Tab 1: Medical Form (Client Component) */}
         <TabsContent value="medical">
           <PatientMedicalForm
-            patientId={patient.id}
             initialData={{
               diagnosis: latestVisit?.diagnosis || "",
               proceduresDone: latestVisit?.proceduresDone || "",
               treatmentPlan: latestVisit?.treatmentPlan || "",
               chiefComplaint: latestVisit?.chiefComplaint || "",
+            }}
+            visitId={latestVisit?.id}
+          />
+
+          <VisitMedicalForm
+            patientId={patient.id}
+            initialData={{
               allergies: patient.allergies || [],
               medications: patient.medications || [],
               notes: patient.notes || "",
@@ -165,15 +178,19 @@ export default async function PatientPage({
 
         {/* Tab 3: Invoices */}
         <TabsContent value="invoices">
-           <PatientInvoices
+          <PatientInvoices
             invoices={invoices}
             totalInvoices={_count.invoices}
-          /> 
+          />
         </TabsContent>
 
         {/* Tab 4: Radiology Images */}
         <TabsContent value="radiology">
-          <PatientRadiology images={images} patientId={patient.id} />
+          <PatientRadiology
+            images={images}
+            patientId={patient.id}
+            uploadedById={uploadedById}
+          />
         </TabsContent>
       </Tabs>
     </div>

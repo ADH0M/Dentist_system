@@ -104,3 +104,17 @@ export const CreateVisitSchema = z.object({
     }),
   note_paid: z.string().optional(),
 });
+
+
+export const RadiologySchema = z.object({
+  uploadDescription: z
+    .string()
+    .min(3, "Description must be at least 3 characters")
+    .max(200, "Description must be less than 200 characters"),
+  uploadToothNumber: z
+    .number()
+    .int("Tooth number must be an integer")
+    .min(1, "Tooth number must be between 1 and 48")
+    .max(48, "Tooth number must be between 1 and 48")
+    .nullable(),
+});

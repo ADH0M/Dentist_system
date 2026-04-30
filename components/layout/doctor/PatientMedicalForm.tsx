@@ -5,79 +5,32 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Loader2, Plus, X } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 interface PatientMedicalFormProps {
-  patientId: string;
   visitId?: string;
-  initialData: {
-    diagnosis: string;
-    proceduresDone: string;
-    treatmentPlan: string;
-    chiefComplaint: string;
-    allergies: string[];
-    medications: string[];
-    notes: string | null;
-  };
+  initialData: InitialData;
+}
+
+interface InitialData {
+  diagnosis: string;
+  proceduresDone: string;
+  treatmentPlan: string;
+  chiefComplaint: string;
 }
 
 export default function PatientMedicalForm({
-  patientId,
   visitId,
   initialData,
 }: PatientMedicalFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState(initialData);
-
-  // For adding new allergies/medications
-  const [newAllergy, setNewAllergy] = useState("");
-  const [newMedication, setNewMedication] = useState("");
+  const [formData, setFormData] = useState<InitialData>(initialData);
 
   const handleFieldChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleAddAllergy = () => {
-    if (newAllergy.trim() && !formData.allergies.includes(newAllergy.trim())) {
-      setFormData((prev) => ({
-        ...prev,
-        allergies: [...prev.allergies, newAllergy.trim()],
-      }));
-      setNewAllergy("");
-    }
-  };
-
-  const handleRemoveAllergy = (allergy: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      allergies: prev.allergies.filter((a) => a !== allergy),
-    }));
-  };
-
-  const handleAddMedication = () => {
-    if (
-      newMedication.trim() &&
-      !formData.medications.includes(newMedication.trim())
-    ) {
-      setFormData((prev) => ({
-        ...prev,
-        medications: [...prev.medications, newMedication.trim()],
-      }));
-      setNewMedication("");
-    }
-  };
-
-  const handleRemoveMedication = (medication: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      medications: prev.medications.filter((m) => m !== medication),
-    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -96,25 +49,14 @@ export default function PatientMedicalForm({
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          diagnosis: formData.diagnosis,
-          proceduresDone: formData.proceduresDone,
-          treatmentPlan: formData.treatmentPlan,
-          chiefComplaint: formData.chiefComplaint,
+          diagnosis: formData.diagnosis, //done2
+          proceduresDone: formData.proceduresDone, //done3
+          treatmentPlan: formData.treatmentPlan, //done4
+          chiefComplaint: formData.chiefComplaint, //done1
         }),
       });
 
       if (!response.ok) throw new Error("Failed to update medical data");
-
-      // Update patient's medical history
-      await fetch(`/api/doctor/patients/${patientId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          allergies: formData.allergies,
-          medications: formData.medications,
-          notes: formData.notes,
-        }),
-      });
 
       toast.success("Medical data updated successfully");
       router.refresh(); // Refresh the page to show updated data
@@ -126,175 +68,64 @@ export default function PatientMedicalForm({
     }
   };
 
+  const cardData = [
+    {
+      label: "chiefComplaint",
+      name: "Chief Complaint",
+      placeholder: "Patient's main complaint...",
+      rows: 3,
+    },
+    {
+      label: "diagnosis",
+      name: "Diagnosis",
+      placeholder: "Medical diagnosis...",
+      rows: 4,
+    },
+    {
+      label: "proceduresDone",
+      name: "Performed Procedures",
+      placeholder: "Medical diagnosis...",
+      rows: 4,
+    },
+    {
+      label: "treatmentPlan",
+      name: "Treatment Plan",
+      placeholder: "Medical diagnosis...",
+      rows: 4,
+    },
+  ];
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-4 flex justify-center flex-col gap-4 items-center w-full "
+    >
       {/* Chief Complaint */}
-      <Card className="border-chart-1 border ">
-        <CardHeader>
-          <CardTitle>Chief Complaint</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Textarea
-            placeholder="Patient's main complaint..."
-            value={formData.chiefComplaint}
-            onChange={(e) =>
-              handleFieldChange("chiefComplaint", e.target.value)
-            }
-            rows={3}
-          />
-        </CardContent>
-      </Card>
-
-      {/* Diagnosis */}
-      <Card className="border-chart-1 border">
-        <CardHeader>
-          <CardTitle>Diagnosis</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Textarea
-            placeholder="Medical diagnosis..."
-            value={formData.diagnosis}
-            onChange={(e) => handleFieldChange("diagnosis", e.target.value)}
-            rows={4}
-          />
-        </CardContent>
-      </Card>
-
-      {/* Procedures Done */}
-      <Card className="border-chart-1 border">
-        <CardHeader>
-          <CardTitle>Performed Procedures</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Textarea
-            placeholder="List all procedures performed..."
-            value={formData.proceduresDone}
-            onChange={(e) =>
-              handleFieldChange("proceduresDone", e.target.value)
-            }
-            rows={4}
-          />
-        </CardContent>
-      </Card>
-
-      {/* Treatment Plan */}
-      <Card className="border-chart-1 border">
-        <CardHeader>
-          <CardTitle>Treatment Plan</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Textarea
-            placeholder="Proposed treatment plan..."
-            value={formData.treatmentPlan}
-            onChange={(e) => handleFieldChange("treatmentPlan", e.target.value)}
-            rows={4}
-          />
-        </CardContent>
-      </Card>
-
-      {/* Allergies */}
-      <Card className="border-chart-1 border">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <div className="h-2 w-2 bg-red-500 rounded-full" />
-            Allergies
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-wrap gap-2">
-            {formData.allergies.map((allergy) => (
-              <Badge key={allergy} variant="destructive" className="gap-1">
-                {allergy}
-                <button
-                  type="button"
-                  onClick={() => handleRemoveAllergy(allergy)}
-                  className="ml-1 hover:text-white"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </Badge>
-            ))}
-          </div>
-
-          <div className="flex gap-2">
-            <Input
-              placeholder="Add allergy..."
-              value={newAllergy}
-              onChange={(e) => setNewAllergy(e.target.value)}
-              onKeyPress={(e) =>
-                e.key === "Enter" && (e.preventDefault(), handleAddAllergy())
-              }
+      {cardData.map((card) => (
+        <Card
+          className="border-chart-1 border w-full sm:max-w-[85%] gap-1  m-0"
+          key={card.label}
+        >
+          <CardHeader>
+            <CardTitle className="text-muted-foreground  ">
+              {card.name}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Textarea
+              name="chiefComplaint"
+              placeholder={`${card.placeholder}`}
+              value={formData[card.label as keyof InitialData]}
+              onChange={(e) => handleFieldChange(card.label, e.target.value)}
+              rows={card.rows}
             />
-            <Button type="button" variant="outline" onClick={handleAddAllergy}>
-              <Plus className="h-4 w-4" />
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Medications */}
-      <Card className="border-chart-1 border">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <div className="h-2 w-2 bg-blue-500 rounded-full" />
-            Current Medications
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-wrap gap-2">
-            {formData.medications.map((medication) => (
-              <Badge key={medication} variant="secondary" className="gap-1">
-                {medication}
-                <button
-                  type="button"
-                  onClick={() => handleRemoveMedication(medication)}
-                  className="ml-1 hover:text-red-500"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </Badge>
-            ))}
-          </div>
-
-          <div className="flex gap-2">
-            <Input
-              placeholder="Add medication..."
-              value={newMedication}
-              onChange={(e) => setNewMedication(e.target.value)}
-              onKeyPress={(e) =>
-                e.key === "Enter" && (e.preventDefault(), handleAddMedication())
-              }
-            />
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleAddMedication}
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Notes */}
-      <Card className="border-chart-1 border">
-        <CardHeader>
-          <CardTitle>Additional Notes</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Textarea
-            placeholder="Any additional notes about the patient..."
-            value={formData.notes || ""}
-            onChange={(e) => handleFieldChange("notes", e.target.value)}
-            rows={3}
-          />
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      ))}
 
       {/* Submit Button */}
       <div className="flex justify-end gap-3">
         <Button type="button" variant="outline" onClick={() => router.back()}>
-          Cancel
+          Next
         </Button>
         <Button type="submit" disabled={isLoading}>
           {isLoading ? (
