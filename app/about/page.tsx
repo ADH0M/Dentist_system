@@ -3,7 +3,7 @@ import { Footer } from "@/components/CopyrightFooter";
 export default function AboutPage() {
   
   return (
-    <div className="main-bg min-h-screen h-full overflow-y-scroll ">
+    <div className="main-bg max-h-screen h-full overflow-y-scroll ">
       {/* Hero Section */}
       <section className="py-12 md:py-24 px-4">
         <div className="max-w-4xl mx-auto text-center">
