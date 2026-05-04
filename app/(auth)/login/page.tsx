@@ -59,7 +59,6 @@ export default function Signup() {
     }
 
     if (state.path && state.message) {
-      console.log(state.path, state.message);
 
       RegistarToast({ error: { path: state.path, message: state.message } });
     }
@@ -86,7 +85,7 @@ export default function Signup() {
   return (
     <div className="w-full flex flex-col items-center justify-center max-h-screen gap-10 p-4    ">
       <div className="w-full flex justify-center items-center   ">
-        <div className="bg-card w-full sm:w-3/4 md:w-1/2 lg:w-1/3 rounded-2xl shadow-xl  overflow-hidden ">
+        <div className="bg-card w-full sm:w-3/4 md:w-1/2 xl:w-[40%] rounded-2xl shadow-xl  overflow-hidden ">
           <div className="bg-linear-to-r from-accent to-accent-foreground p-4 text-card-foreground text-center">
             <h2 className="text-2xl font-bold">Login</h2>
             <p className="mt-2">Enter your credentials to sign in</p>

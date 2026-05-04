@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 
@@ -9,13 +9,10 @@ import {
   Phone,
   Mail,
   MapPin,
-  AlertCircle,
-  Pill,
   Activity,
   DollarSign,
   Image as ImageIcon,
 } from "lucide-react";
-import prisma from "@/lib/db/db-connection";
 import PatientRadiology from "@/components/layout/doctor/PatientRadiology";
 import PatientVisitsHistory from "@/components/layout/doctor/PatientVisitsHistory";
 import PatientMedicalForm from "@/components/layout/doctor/PatientMedicalForm";
@@ -24,6 +21,7 @@ import Link from "next/link";
 import PatientInvoices from "@/components/layout/doctor/PatientInvoices";
 import VisitMedicalForm from "@/components/layout/doctor/VisitMedicalForm";
 import { cookies } from "next/headers";
+import ToothChart from "@/components/tooth-chart/ToothChart";
 
 export default async function PatientPage({
   params,
@@ -33,9 +31,8 @@ export default async function PatientPage({
   const { id } = await params;
   const patient = await getPatientData(id);
   const cookieStore = await cookies();
-  const uploadedById = cookieStore.get('userId')?.value;
-  
-  
+  const uploadedById = cookieStore.get("userId")?.value;
+
   if (!patient) {
     notFound();
   }
@@ -47,7 +44,7 @@ export default async function PatientPage({
       {/* Header with Back Button */}
       <div className="flex items-center gap-4">
         <Link
-          href="/doctor"
+          href="/admin"
           className="inline-flex items-center gap-2 text-muted-foreground text-xs hover:text-chart-2"
         >
           ← Back to Dashboard
@@ -129,22 +126,35 @@ export default async function PatientPage({
       {/* Tabs for Patient Information */}
 
       <Tabs defaultValue="medical" className="space-y-4">
-        <TabsList className="grid w-full px-2 sm:max-w-2/3 grid-cols-4">
+        <TabsList className="grid grid-cols-3 sm:grid-cols-6  w-full px-2 lg:max-w-[85%] ">
           <TabsTrigger value="medical" className="flex items-center gap-2">
             <Activity className="h-4 w-4" />
             Medical Form
           </TabsTrigger>
+
+          <TabsTrigger value="aboutVisit" className="flex items-center gap-2">
+            <Activity className="h-4 w-4" />
+            About Visit
+          </TabsTrigger>
+
+          <TabsTrigger value="toothChart" className="flex items-center gap-2">
+            <Activity className="h-4 w-4" />
+            Tooth Chart
+          </TabsTrigger>
+
+          <TabsTrigger value="radiology" className="flex items-center gap-2">
+            <ImageIcon className="h-4 w-4" />
+            Radiology
+          </TabsTrigger>
+
           <TabsTrigger value="history" className="flex items-center gap-2">
             <Calendar className="h-4 w-4" />
             Visit History
           </TabsTrigger>
+
           <TabsTrigger value="invoices" className="flex items-center gap-2">
             <DollarSign className="h-4 w-4" />
             Invoices
-          </TabsTrigger>
-          <TabsTrigger value="radiology" className="flex items-center gap-2">
-            <ImageIcon className="h-4 w-4" />
-            Radiology
           </TabsTrigger>
         </TabsList>
 
@@ -159,7 +169,10 @@ export default async function PatientPage({
             }}
             visitId={latestVisit?.id}
           />
+        </TabsContent>
 
+        {/* Tab 2: About Visit Form (Client Component) */}
+        <TabsContent value="aboutVisit">
           <VisitMedicalForm
             patientId={patient.id}
             initialData={{
@@ -171,12 +184,12 @@ export default async function PatientPage({
           />
         </TabsContent>
 
-        {/* Tab 2: Visit History */}
+        {/* Tab 3: Visit History */}
         <TabsContent value="history">
           <PatientVisitsHistory visits={allVisits} />
         </TabsContent>
 
-        {/* Tab 3: Invoices */}
+        {/* Tab 4: Invoices */}
         <TabsContent value="invoices">
           <PatientInvoices
             invoices={invoices}
@@ -184,13 +197,18 @@ export default async function PatientPage({
           />
         </TabsContent>
 
-        {/* Tab 4: Radiology Images */}
+        {/* Tab 5: Radiology Images */}
         <TabsContent value="radiology">
           <PatientRadiology
             images={images}
             patientId={patient.id}
             uploadedById={uploadedById}
           />
+        </TabsContent>
+
+        {/* Tab 6: Tooth chart */}
+        <TabsContent value="toothChart">
+          <ToothChart />
         </TabsContent>
       </Tabs>
     </div>

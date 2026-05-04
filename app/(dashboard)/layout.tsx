@@ -3,7 +3,8 @@ import Sidebar from "@/components/Aside";
 import { cookies } from "next/headers";
 import { UserType } from "@/generated/prisma";
 import { redirect } from "next/navigation";
-import PatientDetailsModal from "@/components/layout/doctor/PatientDetailsModal";
+import Online from "@/pages/profile/UserStatus";
+
 
 const layout = async ({ children }: { children: React.ReactNode }) => {
   const cookieStore = await cookies();
@@ -37,6 +38,7 @@ const layout = async ({ children }: { children: React.ReactNode }) => {
       <Sidebar user={currentUser} />
       <main className="flex-1 overflow-x-hidden overflow-y-scroll">
         {children}
+        <Online userId={currentUser.id} />
       </main>
     </div>
   );

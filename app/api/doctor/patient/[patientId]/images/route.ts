@@ -13,7 +13,7 @@ export async function GET(
     const images = await prisma.radiologyImage.findMany({
       where: {
         patientId,
-        deletedAt: null,
+        OR:[{deletedAt: null,} , {deletedAt:{isSet:false}}],
       },
       orderBy: {
         createdAt: "desc",
@@ -40,7 +40,6 @@ export async function POST(
     const body = await request.json();
     const { url, type, description, toothNumber, uploadedById } = body;
 
-    console.log(patientId, url, type, description, toothNumber, uploadedById);
 
     // Validate required fields
     if (!url || !patientId || !uploadedById) {

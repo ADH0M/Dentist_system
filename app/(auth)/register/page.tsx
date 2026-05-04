@@ -197,9 +197,10 @@ export default function Signup() {
     };
   }, [state]);
   return (
-    <div className="w-full flex flex-col items-center justify-center max-h-screen gap-10 p-4 ">
-      <div className="w-full flex justify-center   h-full ">
-        <div className="bg-card w-full sm:w-1/2 md:w-1/3 rounded-2xl shadow-xl  overflow-hidden ">
+    <div className="w-full  h-full items-center rounded-2xl 
+     justify-center overflow-x-hidden overflow-y-scroll gap-10 p-4  ">
+      <div className="w-full flex justify-center items-center   h-fit ">
+        <div className="bg-card w-full sm:w-3/4 md:w-1/2 xl:w-[40%] shadow-xl  rounded-2xl">
           <div className="bg-linear-to-r from-accent to-accent-foreground p-4 text-card-foreground text-center">
             <h2 className="text-2xl font-bold">Create New Account</h2>
             <p className="mt-2">Fill in the details to create a new account</p>
@@ -213,7 +214,7 @@ export default function Signup() {
 
           <form
             action={formAction}
-            className="p-4  flex justify-center flex-col items-center border border-border"
+            className="p-4  flex justify-center  w-full flex-col rounded-b-2xl items-center border border-border"
           >
             {/* Username */}
             <div className="md:w-[90%] w-full">
@@ -481,7 +482,6 @@ export default function Signup() {
           text-white rounded-lg py-3 px-4 font-normal hover:bg-accent transition duration-300
           ${!isFormValid ? "opacity-50 cursor-not-allowed" : ""}`}
             >
-
               {isPending ? (
                 <span className="flex items-center justify-center">
                   <svg

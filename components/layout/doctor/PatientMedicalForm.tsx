@@ -1,13 +1,14 @@
 // app/doctor/patients/[id]/components/PatientMedicalForm.tsx
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { RejectedToast, SuccessToast } from "@/lib/utils/toasts";
 
 interface PatientMedicalFormProps {
   visitId?: string;
@@ -28,6 +29,7 @@ export default function PatientMedicalForm({
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<InitialData>(initialData);
+  const controllerRef = useRef<AbortController>(null);
 
   const handleFieldChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -40,29 +42,45 @@ export default function PatientMedicalForm({
       toast.error("No active visit found for this patient");
       return;
     }
+    if (controllerRef.current?.abort) {
+      controllerRef.current?.abort();
+    }
+
+    controllerRef.current = new AbortController();
+    const signal = AbortSignal.any([
+      controllerRef.current.signal,
+      AbortSignal.timeout(5000),
+    ]);
 
     setIsLoading(true);
 
     try {
       // Update the visit with medical data
-      const response = await fetch(`/api/doctor/visits/${visitId}`, {
+      const response = await fetch(`/api/doctor/medicalForm/${visitId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          diagnosis: formData.diagnosis, //done2
-          proceduresDone: formData.proceduresDone, //done3
-          treatmentPlan: formData.treatmentPlan, //done4
-          chiefComplaint: formData.chiefComplaint, //done1
+          diagnosis: formData.diagnosis,
+          proceduresDone: formData.proceduresDone,
+          treatmentPlan: formData.treatmentPlan,
+          chiefComplaint: formData.chiefComplaint,
         }),
+        signal,
       });
 
       if (!response.ok) throw new Error("Failed to update medical data");
 
-      toast.success("Medical data updated successfully");
-      router.refresh(); // Refresh the page to show updated data
+      SuccessToast("Medical data updated successfully");
+      setFormData({
+        diagnosis: "",
+        proceduresDone: "",
+        treatmentPlan: "",
+        chiefComplaint: "",
+      });
+      router.refresh();
     } catch (error) {
       console.error("Error:", error);
-      toast.error("Failed to update medical data");
+      RejectedToast("Failed to update medical data");
     } finally {
       setIsLoading(false);
     }
@@ -94,6 +112,11 @@ export default function PatientMedicalForm({
       rows: 4,
     },
   ];
+
+  useEffect(() => {
+    return () => controllerRef.current?.abort();
+  }, []);
+
   return (
     <form
       onSubmit={handleSubmit}
@@ -124,8 +147,12 @@ export default function PatientMedicalForm({
 
       {/* Submit Button */}
       <div className="flex justify-end gap-3">
-        <Button type="button" variant="outline" onClick={() => router.back()}>
-          Next
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => controllerRef.current?.abort()}
+        >
+          Cancel
         </Button>
         <Button type="submit" disabled={isLoading}>
           {isLoading ? (

@@ -7,7 +7,6 @@ import { Badge } from "@/components/ui/badge";
 import { Clock, AlertCircle, Pill, Eye } from "lucide-react";
 import { TodayPatient } from "@/store/reducers/doctorSlice";
 import { useRouter } from "next/navigation";
-import React from "react";
 
 interface PatientCardProps {
   patient: TodayPatient;
@@ -49,7 +48,7 @@ export default function PatientCard({ patient, onClick }: PatientCardProps) {
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-3 pt-0">
+      <CardContent className="space-y-3 pt-0 min-h-[200px] flex flex-col justify-between">
         {/* Last Visit Info */}
         {lastVisit && (
           <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -74,7 +73,7 @@ export default function PatientCard({ patient, onClick }: PatientCardProps) {
         {/* Allergies */}
         {allergies && allergies.length > 0 && (
           <div className="flex items-start gap-2">
-            <AlertCircle className="h-4 w-4 text-red-500 mt-0.5" />
+            <AlertCircle className="h-4 w-4 text-destructive mt-0.5" />
             <div className="flex flex-wrap gap-1">
               {allergies.slice(0, 3).map((allergy) => (
                 <Badge key={allergy} variant="destructive" className="text-xs">
@@ -113,7 +112,7 @@ export default function PatientCard({ patient, onClick }: PatientCardProps) {
         {lastVisit?.diagnosis ? (
           <Badge
             variant="default"
-            className="w-full justify-center border-chart-1 text-chart-2 py-2 "
+            className="w-full justify-center border-accent text-accent py-2 "
             onClick={(e) => {
               e.stopPropagation();
               router.push(`/doctor/patient/${patient.id}`);

@@ -1,14 +1,17 @@
 "use client";
-import { UserType } from "@/generated/prisma";
+import { Gender, UserType } from "@/generated/prisma";
 import GenericAdminTable, { Action, Column } from "./UserTabel";
 import { deleteUser } from "@/lib/actions/admin-action";
 
 type Users = {
   isActive: boolean;
   username: string;
-  id: string;
-  email: string;
+  id: string ;
+  email: string |null;
   role: UserType;
+  gender:Gender |null;
+  phone:string;
+
 }[];
 
 const StafTable = ({ users }: { users: Users }) => {
@@ -62,11 +65,10 @@ const StafTable = ({ users }: { users: Users }) => {
     },
   ) as Column<(typeof users)[number]>[];
 
-  console.log(users, staf);
 
   return (
     <GenericAdminTable
-      title="Staf"
+      title="Staff"
       columns={staf}
       data={users}
       actions={stafActions}

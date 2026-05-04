@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // app/api/doctor/today-patients/route.ts
 import prisma from '@/lib/db/db-connection';
 import { NextResponse } from 'next/server';
@@ -88,7 +89,7 @@ export async function GET() {
     const stats = {
       totalPatients: patients.length,
       totalVisits: todayVisits.length,
-      pendingVisits: patients.filter(p => p.todayVisits.some(v => !v.diagnosis)).length
+      pendingVisits: patients.filter(p => p.todayVisits.some((v:any) => !v.diagnosis)).length
     };
     
     return NextResponse.json({

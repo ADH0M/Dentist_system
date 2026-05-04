@@ -80,12 +80,9 @@ export const NewPatientValid = z.object({
 
 export type NewPatientType = z.infer<typeof NewPatientValid>;
 
-
 export const SearchWithPhone = z
   .string()
   .regex(/^01[0125][0-9]{1,8}$/, "Invalid phone number");
-
-
 
 export const CreateVisitSchema = z.object({
   type: z.enum([
@@ -105,6 +102,18 @@ export const CreateVisitSchema = z.object({
   note_paid: z.string().optional(),
 });
 
+export const MedicalFormSchema = z.object({
+  diagnosis: z.string().trim().optional(),
+  proceduresDone: z.string().trim().optional(),
+  treatmentPlan: z.string().trim().optional(),
+  chiefComplaint: z.string().trim().optional(),
+});
+
+export const PatientFormSchema = z.object({
+  allergies: z.array(z.string().trim()).optional(),
+  medications: z.array(z.string().trim()).optional(),
+  notes: z.string().trim().optional(),
+});
 
 export const RadiologySchema = z.object({
   uploadDescription: z

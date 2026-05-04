@@ -1,24 +1,30 @@
 // app/doctor/patients/[id]/components/PatientInvoices.tsx
-'use client';
+"use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { DollarSign, Calendar, CreditCard, FileText } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { DollarSign, Calendar, CreditCard, FileText } from "lucide-react";
+import { $Enums } from "@/generated/prisma";
 
 // تعريف الـ types
-type PaymentStatus = 'pending' | 'paid' | 'partially_paid' | 'refunded' | 'cancelled' | 'insurance_pending';
-type PaymentMethod = 'Cash' | 'Card' | 'Online' | 'Insurance' | 'Installment';
+type PaymentStatus =
+  | "pending"
+  | "paid"
+  | "partially_paid"
+  | "refunded"
+  | "cancelled"
+  | "insurance_pending";
 
 interface Invoice {
   id: string;
+  createdAt: Date;
+  status: $Enums.PaymentStatus;
+  notes: string | null;
+  dueDate: Date | null;
   invoiceNumber: string | null;
   totalAmount: number;
   paidAmount: number;
-  status: PaymentStatus;
-  paymentMethod: PaymentMethod | null;
-  notes: string | null;
-  dueDate: string | null;
-  createdAt: Date;
+  paymentMethod: $Enums.PaymentMethod | null;
 }
 
 interface PatientInvoicesProps {
@@ -26,40 +32,43 @@ interface PatientInvoicesProps {
   totalInvoices: number;
 }
 
-export default function PatientInvoices({ invoices, totalInvoices }: PatientInvoicesProps) {
+export default function PatientInvoices({
+  invoices,
+  totalInvoices,
+}: PatientInvoicesProps) {
   const getStatusColor = (status: PaymentStatus): string => {
     switch (status) {
-      case 'paid':
-        return 'bg-green-100 text-green-700';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-700';
-      case 'partially_paid':
-        return 'bg-blue-100 text-blue-700';
-      case 'cancelled':
-        return 'bg-red-100 text-red-700';
-      case 'refunded':
-        return 'bg-purple-100 text-purple-700';
-      case 'insurance_pending':
-        return 'bg-orange-100 text-orange-700';
+      case "paid":
+        return "bg-green-100 text-green-700";
+      case "pending":
+        return "bg-yellow-100 text-yellow-700";
+      case "partially_paid":
+        return "bg-blue-100 text-blue-700";
+      case "cancelled":
+        return "bg-red-100 text-red-700";
+      case "refunded":
+        return "bg-purple-100 text-purple-700";
+      case "insurance_pending":
+        return "bg-orange-100 text-orange-700";
       default:
-        return 'bg-gray-100 text-gray-700';
+        return "bg-gray-100 text-gray-700";
     }
   };
 
   const getStatusText = (status: PaymentStatus): string => {
     switch (status) {
-      case 'paid':
-        return 'Paid';
-      case 'pending':
-        return 'Pending';
-      case 'partially_paid':
-        return 'Partially Paid';
-      case 'cancelled':
-        return 'Cancelled';
-      case 'refunded':
-        return 'Refunded';
-      case 'insurance_pending':
-        return 'Insurance Pending';
+      case "paid":
+        return "Paid";
+      case "pending":
+        return "Pending";
+      case "partially_paid":
+        return "Partially Paid";
+      case "cancelled":
+        return "Cancelled";
+      case "refunded":
+        return "Refunded";
+      case "insurance_pending":
+        return "Insurance Pending";
       default:
         return status;
     }
@@ -67,7 +76,7 @@ export default function PatientInvoices({ invoices, totalInvoices }: PatientInvo
 
   // حساب إجمالي المتبقي
   const totalBalance = invoices.reduce((sum, inv) => {
-    if (inv.status !== 'cancelled' && inv.status !== 'refunded') {
+    if (inv.status !== "cancelled" && inv.status !== "refunded") {
       return sum + (inv.totalAmount - inv.paidAmount);
     }
     return sum;
@@ -75,7 +84,7 @@ export default function PatientInvoices({ invoices, totalInvoices }: PatientInvo
 
   // حساب إجمالي المدفوع
   const totalPaid = invoices.reduce((sum, inv) => {
-    if (inv.status !== 'cancelled') {
+    if (inv.status !== "cancelled") {
       return sum + inv.paidAmount;
     }
     return sum;
@@ -83,7 +92,7 @@ export default function PatientInvoices({ invoices, totalInvoices }: PatientInvo
 
   // حساب إجمالي الفواتير
   const totalAmount = invoices.reduce((sum, inv) => {
-    if (inv.status !== 'cancelled') {
+    if (inv.status !== "cancelled") {
       return sum + inv.totalAmount;
     }
     return sum;
@@ -101,10 +110,10 @@ export default function PatientInvoices({ invoices, totalInvoices }: PatientInvo
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 ">
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
+        <Card className="border-border">
           <CardContent className="pt-6">
             <div className="flex justify-between items-start">
               <div>
@@ -116,7 +125,7 @@ export default function PatientInvoices({ invoices, totalInvoices }: PatientInvo
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-border">
           <CardContent className="pt-6">
             <div className="flex justify-between items-start">
               <div>
@@ -130,7 +139,7 @@ export default function PatientInvoices({ invoices, totalInvoices }: PatientInvo
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-border">
           <CardContent className="pt-6">
             <div className="flex justify-between items-start">
               <div>
@@ -144,7 +153,7 @@ export default function PatientInvoices({ invoices, totalInvoices }: PatientInvo
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-border">
           <CardContent className="pt-6">
             <div className="flex justify-between items-start">
               <div>
@@ -160,76 +169,95 @@ export default function PatientInvoices({ invoices, totalInvoices }: PatientInvo
       </div>
 
       {/* Invoices List */}
-      <div className="space-y-3">
-        {invoices.map((invoice) => {
-          const remaining = invoice.totalAmount - invoice.paidAmount;
-          const isOverdue = invoice.dueDate && new Date(invoice.dueDate) < new Date() && invoice.status !== 'paid';
-          
-          return (
-            <Card key={invoice.id}>
-              <CardHeader>
-                <div className="flex justify-between items-start flex-wrap gap-2">
-                  <div>
-                    <CardTitle className="text-lg">
-                      {invoice.invoiceNumber || `INV-${invoice.id.slice(-6).toUpperCase()}`}
-                    </CardTitle>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Calendar className="h-3 w-3 text-gray-400" />
-                      <span className="text-sm text-gray-500">
-                        {new Date(invoice.createdAt).toLocaleDateString()}
+      <div className="space-y-3 w-full flex items-center justify-center">
+        <div className="space-y-3 w-full sm:max-w-[95%]">
+          {invoices.map((invoice) => {
+            const remaining = invoice.totalAmount - invoice.paidAmount;
+            const isOverdue =
+              invoice.dueDate &&
+              new Date(invoice.dueDate) < new Date() &&
+              invoice.status !== "paid";
+
+            return (
+              <Card key={invoice.id} className="border-border">
+                <CardHeader>
+                  <div className="flex justify-between items-start flex-wrap gap-2">
+                    <div>
+                      <CardTitle className="text-lg">
+                        {invoice.invoiceNumber ||
+                          `INV-${invoice.id.slice(-6).toUpperCase()}`}
+                      </CardTitle>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Calendar className="h-3 w-3 text-gray-400" />
+                        <span className="text-sm text-gray-500">
+                          {new Date(invoice.createdAt).toLocaleDateString()}
+                        </span>
+                        {invoice.dueDate && (
+                          <>
+                            <span className="text-accent-foreground">•</span>
+                            <span
+                              className={`text-sm ${isOverdue ? "text-destructive" : "text-muted"}`}
+                            >
+                              Due:{" "}
+                              {new Date(invoice.dueDate).toLocaleDateString()}
+                              {isOverdue && " (Overdue)"}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    <Badge className={getStatusColor(invoice.status)}>
+                      {getStatusText(invoice.status)}
+                    </Badge>
+                  </div>
+                </CardHeader>
+
+                <CardContent>
+                  <div className="space-y-2">
+                    <div className="flex justify-between py-2 border-b">
+                      <span className="text-gray-600">Total Amount:</span>
+                      <span className="font-semibold text-primary">
+                        ${invoice.totalAmount.toFixed(2)}
                       </span>
-                      {invoice.dueDate && (
-                        <>
-                          <span className="text-gray-300">•</span>
-                          <span className={`text-sm ${isOverdue ? 'text-red-500' : 'text-gray-500'}`}>
-                            Due: {new Date(invoice.dueDate).toLocaleDateString()}
-                            {isOverdue && ' (Overdue)'}
-                          </span>
-                        </>
-                      )}
                     </div>
-                  </div>
-                  <Badge className={getStatusColor(invoice.status)}>
-                    {getStatusText(invoice.status)}
-                  </Badge>
-                </div>
-              </CardHeader>
-              
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="flex justify-between py-2 border-b">
-                    <span className="text-gray-600">Total Amount:</span>
-                    <span className="font-semibold">${invoice.totalAmount.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between py-2 border-b">
-                    <span className="text-gray-600">Paid Amount:</span>
-                    <span className="text-green-600">${invoice.paidAmount.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between py-2">
-                    <span className="text-gray-600">Remaining:</span>
-                    <span className={`font-semibold ${remaining > 0 ? 'text-yellow-600' : 'text-green-600'}`}>
-                      ${remaining.toFixed(2)}
-                    </span>
-                  </div>
-                  
-                  {invoice.paymentMethod && (
-                    <div className="flex justify-between py-2 border-t mt-2 pt-2">
-                      <span className="text-gray-600">Payment Method:</span>
-                      <span className="text-gray-700">{invoice.paymentMethod}</span>
+                    <div className="flex justify-between py-2 border-b">
+                      <span className="text-gray-600">Paid Amount:</span>
+                      <span className="text-green-600">
+                        ${invoice.paidAmount.toFixed(2)}
+                      </span>
                     </div>
-                  )}
-                  
-                  {invoice.notes && (
-                    <div className="mt-3 pt-3 border-t">
-                      <p className="text-sm text-gray-500">Notes:</p>
-                      <p className="text-sm text-gray-600 mt-1">{invoice.notes}</p>
+                    <div className="flex justify-between py-2">
+                      <span className="text-gray-600">Remaining:</span>
+                      <span
+                        className={`font-semibold ${remaining > 0 ? "text-yellow-600" : "text-green-600"}`}
+                      >
+                        ${remaining.toFixed(2)}
+                      </span>
                     </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+
+                    {invoice.paymentMethod && (
+                      <div className="flex justify-between py-2 border-t mt-2 pt-2">
+                        <span className="text-gray-600">Payment Method:</span>
+                        <span className="text-gray-700">
+                          {invoice.paymentMethod}
+                        </span>
+                      </div>
+                    )}
+
+                    {invoice.notes && (
+                      <div className="mt-3 pt-3 border-t">
+                        <p className="text-sm text-gray-500">Notes:</p>
+                        <p className="text-sm text-gray-600 mt-1">
+                          {invoice.notes}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

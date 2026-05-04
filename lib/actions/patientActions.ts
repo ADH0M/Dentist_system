@@ -61,6 +61,7 @@ export async function createPatient(
           phone,
           password: hashedPassword,
           gender: validation.data.gender,
+          role: "patient",
         },
       });
       await t.patient.create({
@@ -135,7 +136,7 @@ export async function getLastDayPatients(): Promise<{
         },
       },
       orderBy: {
-        createdAt: "desc", // الأحدث أولاً
+        createdAt: "desc",
       },
     });
 
@@ -274,6 +275,9 @@ export async function getPatientData(patientId: string) {
           paidAmount: true,
           status: true,
           dueDate: true,
+          createdAt: true,
+          paymentMethod: true,
+          notes: true,
         },
       },
       images: {
@@ -306,7 +310,10 @@ export async function getPatientData(patientId: string) {
 
   // Get all visits for history
   const allVisits = await prisma.visit.findMany({
-    where: { patientId: patientId, deletedAt: null },
+    where: {
+      patientId: patientId,
+      OR: [{ deletedAt: null }, { deletedAt: { isSet: false } }],
+    },
     orderBy: { visitDate: "desc" },
     select: {
       id: true,

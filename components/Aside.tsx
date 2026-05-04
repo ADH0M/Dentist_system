@@ -26,7 +26,6 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import AddAssistant from "@/pages/assistant/AddAssistant";
 import { logoutAction } from "@/lib/actions/auth-action";
-import { useState } from "react";
 import { useDispatchHook, useSelectorHook } from "@/hooks/useSelector";
 import { changeReciptionsTab } from "@/store/reducers/receptionistReducer";
 
@@ -52,7 +51,7 @@ function SidebarContent({
   const dispatch = useDispatchHook();
   const navItems = [
     { name: "Dashboard", href: "/admin", icon: "📊" },
-    { name: "Patient", href: "/admin/users", icon: "👥" }, // Fixed typo: Patiant → Patient
+    { name: "Doctor", href: "/doctor", icon: "👥" }, // Fixed typo: Patiant → Patient
   ];
 
   const receptionItems = [
@@ -103,12 +102,12 @@ function SidebarContent({
 
       {/* Admin Navigation */}
       {user?.role === "admin" && (
-        <nav className="flex-1 px-4 py-6 overflow-y-auto">
+        <nav className="flex-1  px-4 py-6  overflow-hidden">
           <div className="mb-6">
             <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-4">
               Admin
             </h3>
-            <ul className="space-y-2">
+            <ul className="space-y-2 h-full custom-scroll overflow-x-hidden overflow-y-scroll">
               {navItems.map((item) => (
                 <li key={item.href + " " + item.name}>
                   <Link
@@ -142,6 +141,7 @@ function SidebarContent({
           </div>
         </nav>
       )}
+
 
       {/* Receptionist Navigation */}
       {user?.role === "receptionist" && (

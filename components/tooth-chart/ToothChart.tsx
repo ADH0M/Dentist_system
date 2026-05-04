@@ -42,7 +42,7 @@ function ToothChart({ chart = {}, onChange }: ToothChartProps) {
       const updated = { ...prev, [toothNum]: { ...current, status: nextStatus } }
       return updated
     })
-    onChange!(teeth);
+    // onChange!(teeth);
   }
 
   return (
