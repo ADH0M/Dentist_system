@@ -145,8 +145,3 @@ Required environment variables (see `.env`):
 - `JWT_SECRET` - Authentication secret key
 - `CLOUDINARY_*` - Cloudinary credentials for image uploads
 
----
-
-## License
-
-MIT
