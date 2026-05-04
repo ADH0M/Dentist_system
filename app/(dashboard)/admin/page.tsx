@@ -12,13 +12,38 @@ const AdminDashboard = async () => {
       email: true,
       role: true,
       isActive: true,
+      isVerified: true,
+      gender: true,
+      phone: true,
+      patient: {
+        select: { id: true },
+      },
     },
   });
 
-  const patients = await prisma.patient.findMany({
-    select: { name: true, phone: true, gender: true, id: true },
-  });
+  const patients = users
+    .filter((u) => u.role === "patient")
+    .map((u) => ({
+      id: u.id,
+      username: u.username,
+      phone: u.phone,
+      gender: u.gender,
+      verified: u.isVerified,
+      patientId: u.patient?.id,
+    }));
 
+  const staff = users
+    .filter((user) => user.role !== "patient")
+    .map((u) => ({
+      id: u.id,
+      username: u.username,
+      email: u.email,
+      phone: u.phone,
+      gender: u.gender,
+      role: u.role,
+      isActive: u.isActive,
+      patientId: u.patient?.id,
+    }));
 
   const pationtActions: Action[] = [
     {
@@ -32,40 +57,40 @@ const AdminDashboard = async () => {
   const patientUsers = patients.length;
   const receptionist = users.filter((u) => u.role === "receptionist");
   const assistant = users.filter((u) => u.role === "assistant");
-  const totalUsers = users.length + patientUsers;
+  const totalUsers = users.length;
 
-  const staf = (Object.keys(users[0]) as (keyof (typeof users)[number])[]).map(
-    (u) => {
-      if (u === "isActive") {
-        return {
-          key: u,
-          label: u,
-          render: (value: (typeof users)[number][typeof u]) => {
-            if (typeof value === "boolean") {
-              return value ? "active" : "non";
-            }
-          },
-        };
-      } else {
-        return {
-          key: u,
-          label: u,
-          render: (value: (typeof users)[number][typeof u]) => {
-            if (typeof value === "string") {
-              return value.toUpperCase();
-            }
-            return value;
-          },
-        };
-      }
-    },
-  ) as Columns<(typeof users)[number]>[];
+  // const staf = (Object.keys(users[0]) as (keyof (typeof users)[number])[]).map(
+  //   (u) => {
+  //     if (u === "isActive") {
+  //       return {
+  //         key: u,
+  //         label: u,
+  //         render: (value: (typeof users)[number][typeof u]) => {
+  //           if (typeof value === "boolean") {
+  //             return value ? "active" : "non";
+  //           }
+  //         },
+  //       };
+  //     } else {
+  //       return {
+  //         key: u,
+  //         label: u,
+  //         render: (value: (typeof users)[number][typeof u]) => {
+  //           if (typeof value === "string") {
+  //             return value.toUpperCase();
+  //           }
+  //           return value;
+  //         },
+  //       };
+  //     }
+  //   },
+  // ) as Columns<(typeof users)[number]>[];
 
   //add srotable , render ,aviod id
   const patientColumns = patients.length
     ? (Object.keys(patients[0]) as (keyof (typeof patients)[number])[]).map(
         (pro) => {
-          if (pro === "name") {
+          if (pro === "username") {
             return {
               key: pro,
               label: pro,
@@ -120,7 +145,7 @@ const AdminDashboard = async () => {
       </div>
 
       {/* staf Table */}
-      <StafTable users={users} />
+      <StafTable users={staff} />
       {/* Patiant Table */}
 
       {patients.length >= 0 && (

@@ -1,143 +1,147 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🦷 Dentist System
 
-## Getting Started
+A comprehensive **Dental Clinic Management Web Application** built with modern web technologies, featuring role-based dashboards for managing patients, appointments, visits, invoicing, and dental imaging.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 🚀 Tech Stack
+
+| Category | Technology |
+|----------|------------|
+| Framework | Next.js 16 (App Router) |
+| Language | TypeScript |
+| UI | React 19 |
+| Database | MongoDB + Prisma 6 |
+| State Management | Redux Toolkit |
+| Styling | Tailwind CSS v4 + shadcn/ui |
+| Authentication | JWT (cookie-based with jose) |
+| Image Storage | Cloudinary |
+| Validation | Zod |
+| Icons | Lucide React, React Icons |
+
+---
+
+## 🏗️ Features
+
+- 🔐 **Role-based Authentication** - Secure JWT cookie-based auth
+- 👥 **User Management** - Admin dashboard for staff accounts
+- 🏥 **Patient Management** - Registration & medical records with allergies/medications
+- 🦷 **Tooth Chart Visualization** - Interactive dental charting per visit
+- 📅 **Appointment Scheduling** - Link patients to dentists
+- 📋 **Visit Management** - Clinical notes, diagnosis, treatment plans
+- 💰 **Invoice Generation** - Billing linked to visits
+- 🖼️ **Radiology Imaging** - Cloud-based dental X-rays (Cloudinary)
+- ✅ **Task Management** - Internal staff task assignments
+- 📊 **Activity Logging** - Complete audit trail
+
+---
+
+## 👥 User Roles
+
+- **Admin** - System management, user accounts
+- **Dentist** - Patient treatment, clinical visits
+- **Assistant** - Support workflow
+- **Receptionist** - Scheduling, patient check-in
+- **Patient** - Self-service portal
+
+---
+
+## 🗄️ Database Models (MongoDB/Prisma)
+
+```
+User ────── Patient (1:1)
+    │
+    ├── Appointment ───── Visit (1:1)
+    │         │
+    │         └── Invoice (1:1)
+    │
+    ├── Task
+    │
+    └── ActivityLog
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+| Model | Description |
+|-------|-------------|
+| User | Staff & patient accounts |
+| Patient | Medical records (linked 1:1 to User) |
+| Visit | Clinical visits with tooth charting |
+| Appointment | Scheduling |
+| Invoice | Billing |
+| Task | Staff tasks |
+| RadiologyImage | Dental X-rays |
+| ActivityLog | Audit trail |
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Enums
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **UserType**: admin, dentist, assistant, receptionist, patient
+- **VisitType**: Initial, FollowUp, Emergency, Cleaning, Consultation, Surgery
+- **AppointmentStatus**: scheduled, confirmed, in_progress, completed, cancelled, no_show
+- **PaymentStatus**: pending, paid, partially_paid, refunded, insurance_pending
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## 📁 Project Structure
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+app/                    # Next.js App Router
+  (auth)/              # Login & Register
+  (dashboard)/         # Role-based dashboards
+    admin/             # Admin + user management
+    doctor/            # Dentist patient view
+    assistant/         # Assistant view
+    receptionist/     # Receptionist workflow
+    patient/           # Patient portal
+  api/                 # API routes
+components/            # React components
+  ui/                  # shadcn/ui primitives
+  patient/            # Patient components
+  visit/               # Visit components
+  tooth-chart/         # Dental charting
+lib/                   # Server actions, db connection
+store/                 # Redux store
+generated/prisma/     # Auto-generated Prisma client
+prisma/                # Database schema
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## 🛠️ Getting Started
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+# Install dependencies
+npm install
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# Generate Prisma client
+npx prisma generate
 
+# Push schema to database
+npx prisma db push
 
-## ERD;
-+----------------+      1            *      +----------------+
-|     User       |<------------------------->|   Appointment  |
-|----------------|                           |----------------|
-| id (PK)        | 1                      1  | id (PK)        |
-| username       |                           | startTime      |
-| email          |                           | endTime        |
-| password       |                           | status         |
-| role           |                           | patientId (FK) |
-| phone          |                           | doctorId (FK)  |
-| photo          |                           | visitId (FK)?  |
-| patientId (FK)?|                           +----------------+
-+----------------+
-         | 1
-         |
-         | 0..1
-         |
-         v
-+----------------+
-|    Patient     |
-|----------------|
-| id (PK)        |
-| firstName      |
-| lastName       |
-| phone          |
-| email?         |---partial index  => {partialFilterExpression: {email: { $type: "string" }} ,unique ture}
-| birthDate      |
-| gender         |
-| address        |
-| userId (FK)?   |
-+----------------+
-        | 1
-        |
-        | *
-        v
-+----------------+
-|     Visit      |
-|----------------|
-| id (PK)        |
-| visitDate      |
-| type           |
-| chiefComplaint |
-| diagnosis      |
-| treatmentPlan  |
-| proceduresDone |
-| patientId (FK) |
-+----------------+
-        | 0..1
-        |
-        | 0..1
-        v
-+----------------+
-|     Invoice    |
-|----------------|
-| id (PK)        |
-| invoiceNumber  |
-| totalAmount    |
-| patientId (FK) |
-| visitId (FK)?  |
-+----------------+
+# Run development server
+npm run dev
+```
 
-         ^                
-         | 1              
-         |                
-         | *              
-+----------------+      
-| RadiologyImage |
-|----------------|
-| id (PK)        |
-| url            |
-| type           |
-| description    |
-| toothNumber    |
-| patientId (FK) |
-+----------------+
+Open [http://localhost:3000](http://localhost:3000) to view the application.
 
-         ^
-         | *
-         |
-+----------------+
-|     Task       |
-|----------------|
-| id (PK)        |
-| title          |
-| content        |
-| isDone         |
-| priority       |
-| dueDate        |
-| userId (FK)    |
-+----------------+
+---
 
-         ^
-         | *
-         |
-+----------------+
-|  ActivityLog   |
-|----------------|
-| id (PK)        |
-| action         |
-| entityType     |
-| entityId       |
-| details (Json) |
-| ipAddress      |
-| userId (FK)    |
-+----------------+
+## 📋 Available Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server |
+| `npm run build` | Production build |
+| `npm run lint` | ESLint check |
+| `npx prisma generate` | Regenerate Prisma client |
+| `npx prisma db push` | Sync schema to MongoDB |
+
+---
+
+## Environment Variables
+
+Required environment variables (see `.env`):
+
+- `DATABASE_URL` - MongoDB connection string
+- `JWT_SECRET` - Authentication secret key
+- `CLOUDINARY_*` - Cloudinary credentials for image uploads
+

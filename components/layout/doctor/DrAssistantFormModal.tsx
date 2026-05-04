@@ -1,180 +1,130 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // components/doctor/DrAssistantFormModal.tsx
-'use client';
+"use client";
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Textarea } from "@/components/ui/textarea";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { CldUploadWidget } from "next-cloudinary";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { toast } from "sonner";
+import { RootState } from "@/store/store";
 
-import { useDispatchHook } from "@/hooks/useSelector";
-import { TodayPatient } from "@/store/reducers/doctorSlice";
+import { toast } from "sonner";
 
 interface RadiologyImage {
   url: string;
   description: string;
 }
 
-interface DrAssistantFormModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  patient: TodayPatient | null;  // ← تستقبل patient data كاملة
-  onUpdateSuccess?: () => void;   // callback بعد التحديث
-}
-
-interface FormData {
+interface PatientFormData {
   diagnosis: string;
   procedures: string;
   treatment: string;
   radiologyImages: RadiologyImage[];
 }
 
-export default function DrAssistantFormModal({ 
-  isOpen, 
-  onClose, 
-  patient,
-  onUpdateSuccess 
-}: DrAssistantFormModalProps) {
-  const dispatch = useDispatchHook();
-  const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState<FormData>({
-    diagnosis: "",
-    procedures: "",
-    treatment: "",
-    radiologyImages: [],
-  });
-  
-  const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UploadPreset;
-  const [hasChanges, setHasChanges] = useState(false);
+interface DrAssistantFormModalProps {
+  isOpen: boolean;
+  onChangeOpen: () => void;
+  patientId: string | null;
+  initialData?: {
+    diagnosis?: string;
+    proceduresDone?: string;
+    treatmentPlan?: string;
+    radiologyImages?: RadiologyImage[];
+  };
+}
 
-  // Load patient data when modal opens
+const emptyPatient: PatientFormData = {
+  diagnosis: "",
+  procedures: "",
+  treatment: "",
+  radiologyImages: [],
+};
+
+export default function DrAssistantFormModal({
+  isOpen,
+  onChangeOpen,
+  patientId,
+  initialData,
+}: DrAssistantFormModalProps) {
+  const [patient, setPatient] = useState<PatientFormData>(emptyPatient);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UploadPreset;
+
+  // Load initial data when modal opens
   useEffect(() => {
-    if (isOpen && patient) {
-      // Get the latest visit data
-      const latestVisit = patient.todayVisits?.[0] || {};
-      
-      setFormData({
-        diagnosis: latestVisit.diagnosis || "",
-        procedures: latestVisit.proceduresDone || "",
-        treatment: latestVisit.treatmentPlan || "",
-        radiologyImages: [], // You can load existing images from somewhere
+    if (isOpen && initialData) {
+      setPatient({
+        diagnosis: initialData.diagnosis || "",
+        procedures: initialData.proceduresDone || "",
+        treatment: initialData.treatmentPlan || "",
+        radiologyImages: initialData.radiologyImages || [],
       });
-      setHasChanges(false);
+    } else if (isOpen) {
+      // Reset form when opening without data
+      setPatient(emptyPatient);
     }
-  }, [isOpen, patient]);
+  }, [isOpen, initialData]);
 
   const handleAddImage = (url?: string) => {
     if (!url) return;
-    setFormData((prev) => ({
+    setPatient((prev) => ({
       ...prev,
       radiologyImages: [...prev.radiologyImages, { url, description: "" }],
     }));
-    setHasChanges(true);
   };
 
   const handleUpdateDescription = (index: number, description: string) => {
-    const images = [...formData.radiologyImages];
+    const images = [...patient.radiologyImages];
     images[index].description = description;
-    setFormData((prev) => ({ ...prev, radiologyImages: images }));
-    setHasChanges(true);
+    setPatient((prev) => ({ ...prev, radiologyImages: images }));
   };
 
   const handleRemoveImage = (index: number) => {
-    const images = formData.radiologyImages.filter((_, i) => i !== index);
-    setFormData((prev) => ({ ...prev, radiologyImages: images }));
-    setHasChanges(true);
-  };
-
-  const handleFieldChange = (field: keyof FormData, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    setHasChanges(true);
+    const images = patient.radiologyImages.filter((_, i) => i !== index);
+    setPatient((prev) => ({ ...prev, radiologyImages: images }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!patient) {
+
+    if (!patientId) {
       toast.error("No patient selected");
       return;
     }
-    
-    if (!hasChanges) {
-      toast.info("No changes to save");
-      return;
-    }
-    
+
     setIsLoading(true);
-    
+
     try {
-      // Update the latest visit for this patient
-      const latestVisitId = patient.todayVisits?.[0]?.id;
-      
-      if (!latestVisitId) {
-        toast.error("No visit found for this patient");
-        return;
-      }
-      
-      const response = await fetch(`/api/doctor/visits/${latestVisitId}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          diagnosis: formData.diagnosis,
-          proceduresDone: formData.procedures,
-          treatmentPlan: formData.treatment,
-          // radiologyImages: formData.radiologyImages, // if you have images model
-        }),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to update patient data');
-      }
-      
-      const result = await response.json();
-      
-      toast.success(result.message || "Patient data updated successfully");
-      
-      // Call success callback to refresh data
-      if (onUpdateSuccess) {
-        onUpdateSuccess();
-      }
-      
-      // Close modal
-      onClose();
-      
+      toast.success("Patient data updated successfully");
+
+      // Close modal after success
     } catch (error: any) {
-      console.error('Update error:', error);
-      toast.error(error.message || "Failed to update patient data");
+      toast.error(error || "Failed to update patient data");
     } finally {
       setIsLoading(false);
     }
   };
 
-  if (!patient) return null;
-
-  const patientName = patient.user?.username || 'Unknown Patient';
-  const visitCount = patient.todayVisits?.length || 0;
-
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={onChangeOpen}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">
-            Edit Medical Data
+            Edit Patient Medical Data
           </DialogTitle>
           <p className="text-sm text-gray-500 mt-1">
-            Patient: <span className="font-medium">{patientName}</span>
-            {visitCount > 0 && (
-              <span className="ml-2 text-xs">
-                (Visit #{visitCount} today)
-              </span>
-            )}
+            Update diagnosis, procedures, treatment, and radiology images
           </p>
         </DialogHeader>
 
@@ -191,8 +141,10 @@ export default function DrAssistantFormModal({
               <Textarea
                 id="diagnosis"
                 placeholder="Enter diagnosis..."
-                value={formData.diagnosis}
-                onChange={(e) => handleFieldChange('diagnosis', e.target.value)}
+                value={patient.diagnosis}
+                onChange={(e) =>
+                  setPatient({ ...patient, diagnosis: e.target.value })
+                }
                 className="min-h-[100px]"
                 rows={3}
               />
@@ -211,8 +163,10 @@ export default function DrAssistantFormModal({
               <Textarea
                 id="procedures"
                 placeholder="List performed procedures..."
-                value={formData.procedures}
-                onChange={(e) => handleFieldChange('procedures', e.target.value)}
+                value={patient.procedures}
+                onChange={(e) =>
+                  setPatient({ ...patient, procedures: e.target.value })
+                }
                 className="min-h-[100px]"
                 rows={3}
               />
@@ -231,8 +185,10 @@ export default function DrAssistantFormModal({
               <Textarea
                 id="treatment"
                 placeholder="Describe treatment provided..."
-                value={formData.treatment}
-                onChange={(e) => handleFieldChange('treatment', e.target.value)}
+                value={patient.treatment}
+                onChange={(e) =>
+                  setPatient({ ...patient, treatment: e.target.value })
+                }
                 className="min-h-[100px]"
                 rows={3}
               />
@@ -245,7 +201,7 @@ export default function DrAssistantFormModal({
               <FieldLabel className="text-sm font-medium text-foreground">
                 Radiology Images
               </FieldLabel>
-              
+
               <CldUploadWidget
                 uploadPreset={uploadPreset}
                 onSuccess={(result) => {
@@ -269,9 +225,9 @@ export default function DrAssistantFormModal({
               </CldUploadWidget>
             </div>
 
-            {formData.radiologyImages.length > 0 ? (
+            {patient.radiologyImages.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {formData.radiologyImages.map((img, idx) => (
+                {patient.radiologyImages.map((img, idx) => (
                   <div
                     key={idx}
                     className="border border-border rounded-lg p-3 space-y-2 bg-gray-50"
@@ -317,26 +273,12 @@ export default function DrAssistantFormModal({
 
           {/* Action Buttons */}
           <div className="flex justify-end gap-3 pt-4 border-t">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-            >
+            <Button type="button" variant="outline">
               Cancel
             </Button>
-            <Button
-              type="submit"
-              disabled={isLoading || !hasChanges}
-              className="min-w-[120px]"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Saving...
-                </>
-              ) : (
-                'Save Changes'
-              )}
+            <Button type="submit" className="min-w-[120px]">
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              Save
             </Button>
           </div>
         </form>

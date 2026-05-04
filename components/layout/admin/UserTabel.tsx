@@ -1,9 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { DropdownMenuSubmenu } from "@/components/ui/DropdownMenuSub";
 import { updateUserRole } from "@/lib/actions/admin-action";
-import { PatientFormState } from "@/lib/actions/patientActions";
+import { PatientFormState } from "@/type/types";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useRouter } from "next/navigation";
 import React, { useState, useMemo } from "react";
 
 export type Column<T, K extends keyof T = keyof T> = {
@@ -49,7 +51,7 @@ export default function GenericAdminTable<T>({
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [sortKey, setSortKey] = useState<keyof T | null>(null);
   const [sortAsc, setSortAsc] = useState(true);
-
+  const route = useRouter();
   // 1️⃣ Filtering
   const searchedData = useMemo(() => {
     if (!search) return data;
@@ -102,6 +104,14 @@ export default function GenericAdminTable<T>({
     }
   };
 
+  const handleNavUserPage = (id: string) => {
+    route.push(`/doctor/patient/${id}`);
+  };
+
+  const handlePrefetch = (id: string) => {
+    route.prefetch(`/doctor`);
+  };
+
   return (
     <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden mt-6">
       {/* Header */}
@@ -143,7 +153,7 @@ export default function GenericAdminTable<T>({
               {columns.map((col) => (
                 <th
                   key={col.key as string}
-                  className={`px-6 py-3 font-medium select-none ${col.key === "id" && "hidden"} ${
+                  className={`px-6 py-3 font-medium select-none ${col.key === "patientId" && "hidden"} ${col.key === "id" && "hidden"} ${
                     col.sortable ? "cursor-pointer" : ""
                   }`}
                   onClick={() => col.sortable && handleSort(col.key)}
@@ -173,14 +183,18 @@ export default function GenericAdminTable<T>({
           <tbody className="divide-y divide-border">
             {paginatedData.length ? (
               paginatedData.map((item) => {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const key = rowKey ? item[rowKey] : (item as any).id;
-                
-                
+                const patientId = rowKey
+                  ? item[rowKey]
+                  : (item as any).patientId;
                 return (
                   <tr
                     key={key as string}
                     className="hover:bg-muted/50 transition-colors"
+                    onClick={() => {
+                      handleNavUserPage(patientId as string);
+                    }}
+                    onMouseEnter={() => handlePrefetch(patientId as string)}
                   >
                     {columns.map((col) => {
                       const value = item[col.key];
@@ -188,7 +202,7 @@ export default function GenericAdminTable<T>({
                       return (
                         <td
                           key={col.key as string}
-                          className={`px-6 py-4 ${col.key === "id" && "hidden"}`}
+                          className={`px-6 py-4 ${col.key === "id" && "hidden"} ${col.key === "patientId" && "hidden"}`}
                         >
                           {col.render
                             ? col.render(value)
@@ -203,7 +217,7 @@ export default function GenericAdminTable<T>({
                         {actions.map((act) => {
                           if (act.label.toLocaleLowerCase() === "edite") {
                             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                            const role = (item as any).role
+                            const role = (item as any).role;
                             return (
                               <DropdownMenuSubmenu
                                 labels={[
@@ -213,6 +227,10 @@ export default function GenericAdminTable<T>({
                                   {
                                     label: "receptionist",
                                     key: "receptionist",
+                                  },
+                                  {
+                                    label: "patient",
+                                    key: "patient",
                                   },
                                 ]}
                                 value={role}

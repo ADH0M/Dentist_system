@@ -2,9 +2,9 @@
 
 import { UserType } from "@/generated/prisma";
 import prisma from "@/lib/db/db-connection";
+import { PatientFormState } from "@/type/types";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
-import { PatientFormState } from "./patientActions";
 
 export async function deleteUser({
   id,

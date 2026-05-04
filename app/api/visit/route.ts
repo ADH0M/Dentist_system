@@ -10,7 +10,7 @@ export const GET = async () => {
         state: 500,
       });
     }
-
+    
     return Response.json({
       ...data,
     });

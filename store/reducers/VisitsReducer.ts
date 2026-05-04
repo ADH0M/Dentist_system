@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { getTodayVisits } from "@/lib/actions/visit-action";
 import { SimpleVisitWithUserType } from "@/type/types";
-import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 type InitStateType = {
   data: SimpleVisitWithUserType[] ;

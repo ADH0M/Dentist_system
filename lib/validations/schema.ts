@@ -80,12 +80,9 @@ export const NewPatientValid = z.object({
 
 export type NewPatientType = z.infer<typeof NewPatientValid>;
 
-
 export const SearchWithPhone = z
   .string()
   .regex(/^01[0125][0-9]{1,8}$/, "Invalid phone number");
-
-
 
 export const CreateVisitSchema = z.object({
   type: z.enum([
@@ -103,4 +100,30 @@ export const CreateVisitSchema = z.object({
       message: "Amount must be at least 20",
     }),
   note_paid: z.string().optional(),
+});
+
+export const MedicalFormSchema = z.object({
+  diagnosis: z.string().trim().optional(),
+  proceduresDone: z.string().trim().optional(),
+  treatmentPlan: z.string().trim().optional(),
+  chiefComplaint: z.string().trim().optional(),
+});
+
+export const PatientFormSchema = z.object({
+  allergies: z.array(z.string().trim()).optional(),
+  medications: z.array(z.string().trim()).optional(),
+  notes: z.string().trim().optional(),
+});
+
+export const RadiologySchema = z.object({
+  uploadDescription: z
+    .string()
+    .min(3, "Description must be at least 3 characters")
+    .max(200, "Description must be less than 200 characters"),
+  uploadToothNumber: z
+    .number()
+    .int("Tooth number must be an integer")
+    .min(1, "Tooth number must be between 1 and 48")
+    .max(48, "Tooth number must be between 1 and 48")
+    .nullable(),
 });

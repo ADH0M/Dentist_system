@@ -5,12 +5,12 @@ import { verifyToken } from "./lib/utils/jwt";
 export async function middleware(request: NextRequest) {
   const token =
     request.cookies.get("token")?.value ||
-    request.headers.get("authorization")?.replace("Bearer ", "");   
+    request.headers.get("authorization")?.replace("Bearer ", "");
   if (!token) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  const user =await verifyToken(token);
+  const user = await verifyToken(token);
   if (!user) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
@@ -24,7 +24,13 @@ export async function middleware(request: NextRequest) {
   }
 
   if (pathname.startsWith("/assistant")) {
-    if (!["admin", "dentist", "assistant" ,'patient'].includes(user.role)) {
+    if (!["admin", "dentist", "assistant", "patient"].includes(user.role)) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+  }
+
+  if (pathname.startsWith("/doctor")) {
+    if (user.role !== "admin") {
       return NextResponse.redirect(new URL("/", request.url));
     }
   }
@@ -51,6 +57,7 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     "/admin/:path*",
+    "/doctor/:path*",
     "/assistant/:path*",
     "/receptionist/:path*",
     "/patient/:path*",
