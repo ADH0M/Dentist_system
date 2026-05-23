@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import AddAssistant from "@/pages/assistant/AddAssistant";
+import AddAssistant from "@/components/pages/assistant/AddAssistant";
 import { logoutAction } from "@/lib/actions/auth-action";
 import { useDispatchHook, useSelectorHook } from "@/hooks/useSelector";
 import { changeReciptionsTab } from "@/store/reducers/receptionistReducer";
@@ -141,7 +141,6 @@ function SidebarContent({
           </div>
         </nav>
       )}
-
 
       {/* Receptionist Navigation */}
       {user?.role === "receptionist" && (

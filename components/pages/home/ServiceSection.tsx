@@ -39,7 +39,7 @@ const services: Service[] = [
   },
 ];
 
-export function OurServicesSection() {
+function ServiceSection() {
   return (
     <section className="py-20 bg-background">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -98,3 +98,4 @@ export function OurServicesSection() {
     </section>
   );
 }
+export default ServiceSection;

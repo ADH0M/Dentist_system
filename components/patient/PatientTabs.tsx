@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { OverviewTab } from "./OverviewTab";
 import { AppointmentsTab } from "../appointments/AppointmentsTab";
 import { VisitsTab } from "../visit/VisitsTab";
-import { P_VisitsInvoicesImages } from "@/lib/actions/patientActions";
+import { P_VisitsInvoicesImages } from "@/type/types";
 
 export function PatientTabs({ patient }: { patient: P_VisitsInvoicesImages |undefined }) {
   return (

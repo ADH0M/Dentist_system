@@ -3,7 +3,7 @@ import { PatientQuickStats } from "@/components/patient/PatientQuickStats";
 import { PatientTabs } from "@/components/patient/PatientTabs";
 import PatientTopbar from "@/components/patient/Topbar";
 import { getPatient } from "@/lib/actions/patientActions";
-import ProfilePage from "@/pages/profile/ProfilePage";
+import ProfilePage from "@/components/pages/profile/ProfilePage";
 
 export default async function Page({
   params,

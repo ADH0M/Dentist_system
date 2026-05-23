@@ -6,8 +6,8 @@ interface IUser {
   id: string;
   isActive: boolean;
   username: string;
-  email: string;
-  photo: string | null;
+  email: string | null;
+  profile_avatar: string | null;
   role: string;
   phone: string | null;
 }
@@ -17,7 +17,7 @@ interface IState {
   error: boolean;
   errorMsg?: string | null;
   loading: boolean;
-};
+}
 
 const initialState: IState = {
   data: null,
@@ -26,9 +26,16 @@ const initialState: IState = {
   loading: false,
 };
 
-export const fetchUser = createAsyncThunk(
+export const fetchUser = createAsyncThunk<
+  IUser,
+  { userId: string; email: string },
+  { rejectValue: string }
+>(
   "auth/user",
-  async (data: { userId: string; email: string }, thunkAPI) => {
+  async (
+    data,
+    thunkAPI
+  ): Promise<IUser | ReturnType<typeof thunkAPI.rejectWithValue>> => {
     try {
       const response = await getUser(data.userId, data.email);
       return response;

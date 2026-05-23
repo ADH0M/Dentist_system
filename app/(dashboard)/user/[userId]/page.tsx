@@ -17,13 +17,7 @@ const UserDashboard = async ({
     redirect("/login");
   }
 
-  const p = {
-    id: patient.data.id,
-    name: patient.data.name,
-    phone: patient.data.phone,
-    gender: patient.data.gender ?? null,
-    totalVisits: patient.data.visits.length,
-  };
+
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
@@ -36,7 +30,7 @@ const UserDashboard = async ({
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-card p-6 rounded-xl shadow-sm border border-border">
           <h2 className="text-xl font-semibold mb-4">Patient Info</h2>
           <div className="space-y-3">
@@ -63,7 +57,7 @@ const UserDashboard = async ({
           <h2 className="text-xl font-semibold mb-4">Create New Visit</h2>
           <CreateVisit patient={p} />
         </div>
-      </div>
+      </div> */}
 
       {patient.data.visits.length > 0 && (
         <div className="mt-6 bg-card p-6 rounded-xl shadow-sm border border-border">

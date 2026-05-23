@@ -10,7 +10,7 @@ export const GET = async () => {
       phone: true,
       isActive: true,
       role: true,
-      photo: true,
+      profile_avatar:true,
     },
   });
   return new Response(JSON.stringify(users));

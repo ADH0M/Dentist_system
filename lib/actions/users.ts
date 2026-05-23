@@ -3,8 +3,8 @@
 import { UserType } from "@/generated/prisma";
 import prisma from "../db/db-connection";
 import bcrypt from "bcryptjs";
-import { AddAssistantState } from "@/pages/assistant/AddAssistant";
 import { revalidatePath } from "next/cache";
+import { AddAssistantState } from "@/components/pages/assistant/AddAssistant";
 
 export async function createUser(
   intialState: AddAssistantState,
@@ -83,7 +83,7 @@ export async function createUser(
       select: { id: true },
     });
 
-    const checkPatinet = await t.patient.findFirst({ where: { email } });
+    const checkPatinet = await t.user.findFirst({ where: { email } });
     const checkPhone = await t.user.findUnique({ where: { phone } });
 
     if (checkPhone) existingPhone = true;
@@ -104,22 +104,19 @@ export async function createUser(
 
   // 10. Create user
   await prisma.$transaction(async (t) => {
-    const createAsPatient = await t.patient.create({
-      data: {
-        name: username,
-        phone,
-        email,
-      },
-    });
-
-    await t.user.create({
+    
+    const user = await t.user.create({
       data: {
         username,
         email,
         password: hashedPassword,
         phone,
-        patientId: createAsPatient.id,
         role,
+      },
+    });
+    const createAsPatient = await t.patient.create({
+      data: {
+       userId:user.id
       },
     });
   });

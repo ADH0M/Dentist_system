@@ -3,8 +3,7 @@ import Sidebar from "@/components/Aside";
 import { cookies } from "next/headers";
 import { UserType } from "@/generated/prisma";
 import { redirect } from "next/navigation";
-import Online from "@/pages/profile/UserStatus";
-
+import Online from "@/components/pages/profile/UserStatus";
 
 const layout = async ({ children }: { children: React.ReactNode }) => {
   const cookieStore = await cookies();
