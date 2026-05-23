@@ -1,9 +1,9 @@
 import React from "react";
 import Sidebar from "@/components/Aside";
 import { cookies } from "next/headers";
-import { UserType } from "@/generated/prisma";
 import { redirect } from "next/navigation";
 import Online from "@/components/pages/profile/UserStatus";
+import { UserType } from "@prisma/client";
 
 const layout = async ({ children }: { children: React.ReactNode }) => {
   const cookieStore = await cookies();

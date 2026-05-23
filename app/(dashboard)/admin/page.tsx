@@ -20,7 +20,6 @@ const AdminDashboard = async () => {
       },
     },
   });
-
   const patients = users
     .filter((u) => u.role === "patient")
     .map((u) => ({

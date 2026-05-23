@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import CreateVisit from "@/components/visit/CreateVisit";
 import { getPatient } from "@/lib/actions/patientActions";
 import { redirect } from "next/navigation";
@@ -63,7 +64,7 @@ const UserDashboard = async ({
         <div className="mt-6 bg-card p-6 rounded-xl shadow-sm border border-border">
           <h2 className="text-xl font-semibold mb-4">Visit History</h2>
           <div className="space-y-3">
-            {patient.data.visits.slice(-5).reverse().map((visit) => (
+            {patient.data.visits.slice(-5).reverse().map((visit :any) => (
               <div key={visit.id} className="flex justify-between py-2 border-b border-border">
                 <span className="text-muted-foreground">
                   {new Date(visit.createdAt).toLocaleDateString()}

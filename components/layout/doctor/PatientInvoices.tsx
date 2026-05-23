@@ -4,7 +4,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { DollarSign, Calendar, CreditCard, FileText } from "lucide-react";
-import { $Enums } from "@/generated/prisma";
+import { $Enums } from "@prisma/client";
 
 // تعريف الـ types
 type PaymentStatus =

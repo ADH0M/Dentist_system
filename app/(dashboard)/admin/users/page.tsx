@@ -4,7 +4,8 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { createUser, deleteUser, toggleUserActive, updateUserType } from "@/lib/actions/users";
-import { UserType } from "@/generated/prisma";
+import { UserType } from "@prisma/client";
+
 
 interface User {
   id: string;

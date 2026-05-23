@@ -1,6 +1,6 @@
 "use server";
 
-import { UserType } from "@/generated/prisma";
+import { UserType } from "@prisma/client";
 import prisma from "@/lib/db/db-connection";
 import { PatientFormState } from "@/type/types";
 import { revalidatePath } from "next/cache";
@@ -42,7 +42,7 @@ export async function deleteUser({
       error: "error",
     };
   }
-};
+}
 
 export async function updateUserRole(userId: string, newRole: UserType) {
   const cookieStore = await cookies();
@@ -50,10 +50,10 @@ export async function updateUserRole(userId: string, newRole: UserType) {
 
   if (role !== "admin") {
     throw new Error("Unauthorized");
-  };
-  
-  if(!userId){
-    throw new Error('user undefined');
+  }
+
+  if (!userId) {
+    throw new Error("user undefined");
   }
 
   try {
@@ -66,6 +66,4 @@ export async function updateUserRole(userId: string, newRole: UserType) {
     console.error("Failed to update user role:", error);
     throw new Error("Failed to update user role");
   }
-};
-
-
+}

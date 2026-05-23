@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
-import { Prisma, Visit, VisitType } from "@/generated/prisma";
+import { Prisma, Visit, VisitType } from "@prisma/client";
 import prisma from "../db/db-connection";
 import { revalidatePath } from "next/cache";
 import { CreateVisitSchema } from "@/lib/validations/schema";

@@ -12,7 +12,7 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { UserType } from "@/generated/prisma";
+import { UserType } from "@prisma/client";
 
 export function DropdownMenuSubmenu({
   labels = [],
@@ -20,14 +20,14 @@ export function DropdownMenuSubmenu({
   panel_position = "",
   method,
   userId,
-  value
+  value,
 }: {
   labels: { label: UserType; key: UserType }[];
   mainTile: string;
   panel_position: string;
   method?: (userId: string, userRole: UserType) => Promise<void>;
   userId?: string;
-  value?:string
+  value?: string;
 }) {
   const [position, setPosition] = React.useState(value);
 

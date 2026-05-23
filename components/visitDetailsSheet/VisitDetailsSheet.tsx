@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/sheet";
 
 import ToothChart from "@/components/tooth-chart/ToothChart";
-import { Visit } from "@/generated/prisma";
+import { Visit } from "@prisma/client";
 
 type Props = {
   visit: Visit;

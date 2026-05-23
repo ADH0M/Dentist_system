@@ -6,7 +6,7 @@ import { SearchWithPhone } from "@/lib/validations/schema";
 import { InfoIcon, XIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import PatientCard from "./PatientCard";
-import { Gender } from "@/generated/prisma";
+import { Gender } from "@prisma/client";
 
 export type UserSimpleInfo = {
   userId: string;

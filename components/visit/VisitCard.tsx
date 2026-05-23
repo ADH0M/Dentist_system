@@ -1,6 +1,6 @@
 "use client";
 
-import { Visit } from "@/generated/prisma";
+import { Visit } from "@prisma/client";
 import { memo, useState } from "react";
 import VisitDetailsSheet from "../visitDetailsSheet/VisitDetailsSheet";
 
@@ -19,16 +19,12 @@ function VisitCard({ visit }: { visit: Visit }) {
         </h4>
         {visit.diagnosis && (
           <p className="text-sm text-muted-foreground">
-            Diagnosis: {visit.diagnosis ||"__"}
+            Diagnosis: {visit.diagnosis || "__"}
           </p>
         )}
       </div>
 
-      <VisitDetailsSheet
-        visit={visit}
-        open={open}
-        onOpenChange={setOpen}
-      />
+      <VisitDetailsSheet visit={visit} open={open} onOpenChange={setOpen} />
     </>
   );
 }

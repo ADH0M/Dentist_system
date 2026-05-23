@@ -3,7 +3,7 @@ import { SimplePatientVisitType } from "@/type/types";
 
 export async function GET(
   request: Request,
-  { params }: RouteContext<"/api/patient/visits/[patientId]">,
+  { params }: {params:Promise<{patientId:string}>},
 ) {
   const { patientId } = await params;
   const res = (await prisma.visit.findMany({

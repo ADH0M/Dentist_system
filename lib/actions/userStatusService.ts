@@ -1,4 +1,4 @@
-import { JsonValue } from "@/generated/prisma/runtime/library";
+import { JsonValue } from "@prisma/client/runtime/library";
 import prisma from "../db/db-connection";
 
 export interface UserStatus {
@@ -23,7 +23,6 @@ export async function updateUserStatus(
       deviceInfo,
     };
 
-    
     await prisma.user.update({
       where: { id: userId },
       data: { isOnline, lastLogin: new Date(), deviceInfo },

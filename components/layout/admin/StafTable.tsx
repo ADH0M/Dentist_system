@@ -1,17 +1,16 @@
 "use client";
-import { Gender, UserType } from "@/generated/prisma";
+import { Gender, UserType } from "@prisma/client";
 import GenericAdminTable, { Action, Column } from "./UserTabel";
 import { deleteUser } from "@/lib/actions/admin-action";
 
 type Users = {
   isActive: boolean;
   username: string;
-  id: string ;
-  email: string |null;
+  id: string;
+  email: string | null;
   role: UserType;
-  gender:Gender |null;
-  phone:string;
-
+  gender: Gender | null;
+  phone: string;
 }[];
 
 const StafTable = ({ users }: { users: Users }) => {
@@ -19,7 +18,8 @@ const StafTable = ({ users }: { users: Users }) => {
     {
       label: "Delete",
       actionFn: deleteUser,
-      className:"text-xs px-3 py-1 rounded border border-border hover:bg-red-500/40 cursor-pointer hover:text-white transition-colors "
+      className:
+        "text-xs px-3 py-1 rounded border border-border hover:bg-red-500/40 cursor-pointer hover:text-white transition-colors ",
     },
     {
       label: "Edite",
@@ -64,7 +64,6 @@ const StafTable = ({ users }: { users: Users }) => {
       }
     },
   ) as Column<(typeof users)[number]>[];
-
 
   return (
     <GenericAdminTable

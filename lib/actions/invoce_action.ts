@@ -1,6 +1,6 @@
 "use server";
 
-import { PaymentMethod, PaymentStatus } from "@/generated/prisma";
+import { PaymentMethod, PaymentStatus } from "@prisma/client";
 import { VisitFormState } from "./visit-action";
 import { revalidatePath } from "next/cache";
 import prisma from "../db/db-connection";

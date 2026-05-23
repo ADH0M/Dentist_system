@@ -1,6 +1,6 @@
 "use server";
 
-import { Gender, Patient } from "@/generated/prisma";
+import { Gender, Patient } from "@prisma/client";
 import prisma from "../db/db-connection";
 import { revalidatePath } from "next/cache";
 import { NewPatientValid } from "../validations/schema";
@@ -110,8 +110,6 @@ export async function getPatient(id: string): Promise<GetPatientType> {
       };
     }
 
-    console.log(pateint);
-
     return { success: true, data: pateint };
   } catch (error) {
     return { success: false, msg: "try again ", error: true };
@@ -125,7 +123,6 @@ export async function getLastDayPatients(): Promise<{
   count?: number;
 }> {
   try {
-    // حساب نطاق زمن ليوم أمس
     const { startOfDay, endOfDay } = getDateRange(1);
 
     const patients = await prisma.patient.findMany({

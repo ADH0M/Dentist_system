@@ -1,6 +1,7 @@
 // app/admin/users/actions.ts
 "use server";
-import { UserType } from "@/generated/prisma";
+import type { Prisma, UserType } from "@prisma/client";
+
 import prisma from "../db/db-connection";
 import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
@@ -77,7 +78,7 @@ export async function createUser(
   // 7. Check for existing user (email)
   let existingEmail = false;
   let existingPhone = false;
-  await prisma.$transaction(async (t) => {
+  await prisma.$transaction(async (t: Prisma.TransactionClient) => {
     const checkInUser = await t.user.findUnique({
       where: { email },
       select: { id: true },
@@ -103,8 +104,7 @@ export async function createUser(
   console.log(username, email, password, hashedPassword);
 
   // 10. Create user
-  await prisma.$transaction(async (t) => {
-    
+  await prisma.$transaction(async (t: Prisma.TransactionClient) => {
     const user = await t.user.create({
       data: {
         username,
@@ -116,7 +116,7 @@ export async function createUser(
     });
     const createAsPatient = await t.patient.create({
       data: {
-       userId:user.id
+        userId: user.id,
       },
     });
   });
@@ -149,7 +149,7 @@ export async function updateUserType(formData: FormData) {
 export async function deleteUser(formData: FormData) {
   const userId = formData.get("userId") as string;
 
-  await prisma.$transaction(async (t) => {
+  await prisma.$transaction(async (t: Prisma.TransactionClient) => {
     const findUser = await t.user.findUnique({
       where: { id: userId },
     });
@@ -190,4 +190,3 @@ export async function getUser(userId: string, email: string) {
   }
   return user;
 }
-
